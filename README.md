@@ -14,6 +14,8 @@ Sistema operativo agentico multi-proyecto para orquestación de equipos TI.
 
 Ver [docs/runbooks/local_dev.md](docs/runbooks/local_dev.md).
 
+**Phase 0 – Primera vez:** Crear el repositorio en GitHub (runbook §2), añadir `remote` y hacer push del primer commit. Luego validar Docker y conectividad Ollama (runbook §5–8 y §9).
+
 ## Fases
 
 0. Documentation  
