@@ -206,3 +206,24 @@ Environment is ready when:
 
 \- Logs/artifacts directories mounted
 
+
+
+---
+
+
+
+\## 9. Phase 0 acceptance checklist
+
+
+
+Before marking Phase 0 complete, validate all criteria from plans/phases/00\_documentation/acceptance.toml:
+
+
+
+1. **GitHub repository exists** – Create repo (step 2) and push: `git remote add origin <url>` then `git push -u origin main`.
+2. **Project structure committed** – All plans, docs, src, runtime/docker in main.
+3. **Docker container builds** – From runtime/docker: `docker compose up --build` (no error).
+4. **Ollama accessible from container** – From host: `docker exec -it agentic-core bash`, then inside: `curl $OLLAMA_BASE_URL/api/tags` (JSON response). Ensure runtime/docker/.env exists (copy from .env.example) with OLLAMA_BASE_URL=http://host.docker.internal:11434.
+5. **ADR 0001 created** – docs/adr/0001-python-langgraph-docker.md committed.
+6. **Environment validated using runbook** – Steps 5–8 executed successfully.
+

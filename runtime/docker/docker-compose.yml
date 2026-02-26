@@ -1,6 +1,6 @@
-version: "3.9"
 services:
   agentic-ti-os:
+    container_name: agentic-core
     build:
       context: ../..
       dockerfile: runtime/docker/Dockerfile
