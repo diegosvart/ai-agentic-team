@@ -1,0 +1,12 @@
+version = "1.0"
+phase = "0"
+
+[acceptance_criteria]
+required = [
+  "GitHub repository exists",
+  "Project structure committed",
+  "Docker container builds",
+  "Ollama accessible from container",
+  "ADR 0001 created",
+  "Environment validated using runbook"
+]

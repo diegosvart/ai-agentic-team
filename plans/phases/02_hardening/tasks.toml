@@ -1,0 +1,8 @@
+version = "1.0"
+phase = "2"
+name = "Hardening Tasks"
+
+[[tasks]]
+id = "2.1"
+title = "TBD"
+status = "pending"

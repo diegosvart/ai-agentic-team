@@ -1,0 +1,2 @@
+# Agentic TI OS – Python dependencies
+# Phase 0: minimal for Docker skeleton (no LangGraph yet)

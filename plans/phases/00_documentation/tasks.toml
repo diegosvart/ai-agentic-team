@@ -1,0 +1,33 @@
+version = "1.0"
+phase = "0"
+name = "Documentation Freeze Tasks"
+
+[[tasks]]
+id = "P0-1"
+title = "Create GitHub repository"
+description = "Initialize agentic-ti-os repository and push base structure."
+done_when = "Repository accessible and first commit pushed"
+
+[[tasks]]
+id = "P0-2"
+title = "Commit master_plan.toml"
+description = "Add and version master_plan.toml at root."
+done_when = "master_plan.toml committed in main branch"
+
+[[tasks]]
+id = "P0-3"
+title = "Create ADR template"
+description = "Add docs/adr/adr_template.toml and record first decision."
+done_when = "ADR 0001 committed"
+
+[[tasks]]
+id = "P0-4"
+title = "Create Docker skeleton"
+description = "Add Dockerfile and docker-compose.yml."
+done_when = "docker compose up runs without error"
+
+[[tasks]]
+id = "P0-5"
+title = "Validate Ollama connectivity"
+description = "Ensure container can connect to Ollama via host.docker.internal."
+done_when = "Successful curl from container"

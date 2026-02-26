@@ -1,0 +1,274 @@
+version = "1.0"
+doc_type = "master_plan"
+project_name = "Agentic TI Operating System"
+mode = "multi-project"
+owner_role = "CTO (human)"
+timezone = "America/Sao_Paulo"
+language = "es"
+date_created = "2026-02-26"
+status = "draft"
+
+[principles]
+north_star = "Arquitectura agentic empresarial, auditable, gobernable y escalable, con autonomía progresiva."
+source_of_truth_work = "MS365 Planner (Graph)"
+code_of_truth = "Git repository"
+runtime_principle = "Docker-first (local), portable a VPS/Cloud"
+execution_principle = "Workflow determinístico + gates humanos + evidencia"
+llm_principle = "Local-first con router a API para tareas de alto riesgo"
+security_principle = "Least privilege + logging de mutaciones + separación de permisos por herramienta"
+
+[objectives]
+primary = [
+  "Demostrar aplicación empresarial de un Agentic Team en 2 meses con evidencia",
+  "Construir arquitectura sólida y escalable (no solo un demo)",
+  "Medir y demostrar incremento de productividad (30–60%) en tareas repetitivas de baja fricción"
+]
+secondary = [
+  "Preparar base para futura fase: despliegue en unidad TI interna",
+  "Habilitar capa analítica (Power BI) una vez exista trazabilidad y logs estructurados"
+]
+
+[constraints]
+timeline_weeks = 8
+budget_usd_month = 50
+environments = ["local (Docker Desktop)", "VPS", "Azure (selectivo)"]
+tech_stack_current = ["Python", "Node.js", "Azure", "Docker"]
+ide_stack = ["Cursor", "Claude Code"]
+llm_execution = ["Ollama (local)", "API commercial (selective)", "hybrid routing"]
+autonomy_initial = "execute_with_human_approval"
+autonomy_future = "progressive_autonomy_with_criteria"
+
+[scope]
+in_scope = [
+  "Orquestación de agentes y workflows determinísticos",
+  "Integración real con Planner (Graph): leer/crear/actualizar tareas",
+  "Integración real con Git: branches/commits/PR",
+  "Tooling local (Docker) para ejecutar tests, linters, scanners",
+  "Observabilidad: logs estructurados + run summaries + evidence packs",
+  "Evaluación: criterios DoR/DoD + quality gates",
+  "Multi-project: múltiples proyectos bajo un único CTO humano"
+]
+out_of_scope = [
+  "Autonomía total sin gates en fase inicial",
+  "Multi-tenant (múltiples CTO/organizaciones) en v1",
+  "Automatización de identidad/cuentas M365 en v1",
+  "Power BI como primera prioridad (se incorpora tras observabilidad)"
+]
+
+[roles]
+human = ["CTO"]
+
+[roles.agents]
+executive_orchestrator = "Coordina runs multi-proyecto, gestiona estado y colas, aplica políticas y gates."
+pm_agent = "Convierte objetivos en backlog, define alcance, criterios de aceptación, riesgos y dependencias."
+techlead_agent = "Diseña solución técnica, descompone tareas, define DoD técnico, estima riesgos."
+backend_agent = "Implementa cambios backend, propone PRs, añade tests."
+frontend_agent = "Implementa cambios frontend, propone PRs, añade tests."
+devops_agent = "CI/CD, Docker, deploy, config, runbooks, IaC si aplica."
+qa_agent = "Plan de pruebas, validación, regresión, checklist de salida."
+security_agent = "SAST/deps/secrets, hardening checklist, revisión de permisos."
+data_agent = "ETL/validaciones/profiling cuando aplique."
+support_agent = "Triage de incidentes, análisis de logs, runbooks, mitigación guiada."
+
+[execution_modes]
+modes = ["propose_only", "execute_with_approval", "auto_execute_with_rollback"]
+default = "execute_with_approval"
+
+[gates]
+gate_A = { name = "Plan Approval", who = "CTO", required_for = ["scope", "acceptance_criteria", "risk_summary"] }
+gate_B = { name = "Change Approval", who = "CTO", required_for = ["merge", "config_change", "tool_mutation"] }
+gate_C = { name = "Release Approval", who = "CTO", required_for = ["deploy", "infra_change"] }
+
+[state_model]
+description = "Estado persistente por run (workflow execution), auditable y trazable."
+required_fields = [
+  "run_id",
+  "project_id",
+  "objective",
+  "context_refs",
+  "plan",
+  "artifacts",
+  "tool_calls",
+  "eval",
+  "approvals",
+  "status",
+  "timestamps"
+]
+status_values = ["proposed", "in_progress", "blocked", "ready_for_approval", "done", "failed"]
+
+[workflows]
+core = ["W1_delivery_planner_to_pr", "W2_incident_triage", "W3_maintenance_batch", "W4_continuous_audit"]
+mvp_focus = ["W1_delivery_planner_to_pr"]
+
+[workflows.W1_delivery_planner_to_pr]
+input = ["Planner task/epic"]
+output = ["Plan", "Branch/PR", "Test results", "Security report", "Planner updates", "Run Summary", "Evidence Pack"]
+steps = [
+  "PM: normalizar requerimiento + DoR",
+  "TL: diseño técnico + tareas + DoD + riesgos",
+  "Dev: implementar cambios + tests + PR",
+  "QA: ejecutar validaciones + checklist",
+  "Sec: ejecutar checks + checklist",
+  "CTO Gate B: aprobar merge",
+  "DevOps (opcional): deploy con Gate C",
+  "Actualizar Planner + registrar evidencia"
+]
+
+[workflows.W2_incident_triage]
+input = ["Issue/log/error report"]
+output = ["Diagnóstico", "Plan mitigación", "PR si aplica", "Runbook actualizado", "Ticket Planner"]
+steps = ["Support: triage", "TL: causa raíz", "Dev/DevOps: fix", "QA/Sec: validate", "CTO approvals"]
+
+[workflows.W3_maintenance_batch]
+input = ["Lista tareas repetitivas (deps/docs/refactors menores)"]
+output = ["Batch PRs", "Evidence", "Planner updates"]
+steps = ["PM: batch scope", "TL: guardrails", "Dev/QA/Sec: ejecución por lotes", "CTO gate merge"]
+
+[workflows.W4_continuous_audit]
+input = ["Repos/infra targets"]
+output = ["Hallazgos priorizados", "Tickets Planner", "Mitigaciones propuestas", "Reportes"]
+steps = ["Sec/QA: scan", "TL: priorizar", "PM: convertir a backlog", "CTO: aprobar ejecución"]
+
+[quality]
+[quality.definition_of_ready]
+requirements = [
+  "Descripción clara del objetivo",
+  "Criterios de aceptación definidos",
+  "Repo/servicio objetivo identificado",
+  "Riesgos conocidos o marcados explícitamente",
+  "Permisos/herramientas necesarios definidos"
+]
+
+[quality.definition_of_done]
+requirements = [
+  "PR creado con descripción y alcance",
+  "CI/tests pasan (o justificación registrada)",
+  "Checklist QA completo",
+  "Checklist Security completo",
+  "Evidence Pack generado",
+  "Planner actualizado con estado y enlaces"
+]
+
+[observability]
+log_format = "jsonl"
+required_logs = [
+  "tool_calls (input/output, duration, status)",
+  "agent_outputs (structured)",
+  "approvals (who/when/why)",
+  "eval_results (tests, linters, scanners)"
+]
+artifacts = ["Run Summary", "Evidence Pack"]
+storage_recommendation = ["SQLite (dev)", "Postgres (scale)"]
+
+[evaluation]
+goal = "Criterios objetivos para medir calidad y habilitar autonomía progresiva."
+success_signals = [
+  "PR aprobado sin cambios mayores",
+  "CI pass rate >= 95%",
+  "0 incidentes post-merge atribuibles al agente en ventana definida",
+  "Issues no reabiertos por defecto de calidad",
+  "Tiempo ciclo reducido vs baseline"
+]
+autonomy_promotion_rules = [
+  "Tras N=20 entregas: >=80% PRs aprobados sin cambios mayores",
+  "0 incidentes severos atribuibles al agente en el periodo",
+  "Cumplimiento sostenido de DoD y logs completos"
+]
+
+[architecture_target]
+style = "dockerized_backend_core_with_ide_as_interface"
+core_language = "python"
+orchestration_candidate = ["LangGraph (preferred for determinism)", "CrewAI (faster MVP, less governance)"]
+tool_integration = ["MCP where applicable", "direct API wrappers"]
+llm_router = "policy-based routing local-first with API fallback"
+
+[architecture_target.components]
+orchestrator = "Workflow engine + state persistence + gates + retries"
+llm_router = "Select model (local/API) based on task type, risk, cost"
+planner_tool = "Graph API wrapper for Planner (tasks, buckets, plans, assignments)"
+git_tool = "Repo actions: branch/commit/PR, CI status"
+devops_tool = "Docker run/test, optional deploy scripts, infra checks"
+qa_tool = "Test runner + reporting"
+security_tool = "SAST/deps/secrets scans + reporting"
+logging_module = "Structured logs + correlation IDs"
+evidence_module = "Build Run Summary + Evidence Pack"
+policy_module = "Permissions, execution modes, guardrails"
+storage = "State DB + artifact store"
+
+[integrations]
+planner = { method = "Microsoft Graph API", purpose = "source_of_truth_work" }
+power_bi = { method = "later_phase", purpose = "analytics_on_planner_and_agent_logs" }
+azure = { method = "tool_wrapper", purpose = "selective deployment/integration" }
+
+[phases]
+[phases.phase_0_documentation]
+name = "Documentación completa v1 (Target Architecture + Operating Model)"
+duration_weeks = 1
+deliverables = [
+  "Documento maestro (este TOML) + ADR template",
+  "Diagrama conceptual (roles, gates, workflows)",
+  "Modelo de estado del run",
+  "Políticas de ejecución y seguridad",
+  "Definición MVP (W1) y métricas baseline"
+]
+
+[phases.phase_1_core_mvp]
+name = "Core agentic + W1 Planner→PR con gates y evidencia"
+duration_weeks = 3
+deliverables = [
+  "Orchestrator v1 + state persistence",
+  "PlannerTool v1 (read/write basic)",
+  "GitTool v1 (branch/PR workflow)",
+  "Logging + Evidence pack v1",
+  "Execution modes + Gate A/B implementados",
+  "Primeras tareas reales ejecutadas con aprobación"
+]
+
+[phases.phase_2_hardening]
+name = "QA/Sec/DevOps integration + reliability"
+duration_weeks = 2
+deliverables = [
+  "QA checks integrados",
+  "Security checks integrados",
+  "Retry policies + failure handling",
+  "Runbook operativo local (Docker)",
+  "Mejoras observabilidad y métricas internas"
+]
+
+[phases.phase_3_real_project_pilot]
+name = "Proyecto real medible (2–3 flujos) + baseline productividad"
+duration_weeks = 2
+deliverables = [
+  "Aplicación en repos existente con entregas repetibles",
+  "Comparación baseline vs agent-assisted",
+  "Reporte de valor (evidencia + métricas)",
+  "Criterios para ampliar autonomía en tareas de bajo riesgo"
+]
+
+[phases.phase_4_analytics_optional]
+name = "Power BI: dashboards ejecutivos (Planner + logs agent)"
+duration_weeks = 1
+deliverables = [
+  "Dataset/modelo de datos",
+  "Dashboard productividad/throughput/calidad",
+  "Automatización refresh (si aplica)",
+  "Narrativa ejecutiva para fase empresarial"
+]
+
+[adr_process]
+enabled = true
+adr_location = "docs/adr/"
+rule = "Toda decisión relevante (framework, storage, permisos, modelos) genera ADR breve con contexto y tradeoffs."
+
+[multi_project_model]
+project_identity = "project_id"
+project_sources = ["Planner plan_id", "repo_id", "env_id"]
+shared_services = ["orchestrator", "llm_router", "logging", "policy_module"]
+per_project_overrides = ["tools permissions", "risk policy", "model routing weights", "workflows enabled"]
+
+[next_actions]
+priority = [
+  "Congelar documentación v1 en repo (master_plan.toml + ADR template)",
+  "Definir el proyecto piloto real (repositorio + plan Planner) para W1",
+  "Implementar phase_1_core_mvp (W1) con gates y evidencia desde el día 1"
+]

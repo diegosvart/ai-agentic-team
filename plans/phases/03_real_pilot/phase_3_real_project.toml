@@ -1,0 +1,9 @@
+# Phase 3 – Real Pilot
+version = "1.0"
+phase_id = "03_real_pilot"
+name = "Real Project Pilot"
+tasks_file = "tasks.toml"
+acceptance_file = "acceptance.toml"
+
+[meta]
+description = "Piloto con proyecto real end-to-end"

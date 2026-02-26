@@ -1,0 +1,20 @@
+%% Agentic TI OS – Architecture
+flowchart TB
+    subgraph runtime["Runtime"]
+        Docker
+        docker-compose
+    end
+    subgraph core["Core"]
+        orchestrator["Orchestrator Graph"]
+        router["LLM Router"]
+    end
+    subgraph nodes["Nodes"]
+        pm["PM"]
+        techlead["Tech Lead"]
+        backend["Backend"]
+        qa["QA"]
+        security["Security"]
+    end
+    Docker --> orchestrator
+    orchestrator --> router
+    orchestrator --> nodes

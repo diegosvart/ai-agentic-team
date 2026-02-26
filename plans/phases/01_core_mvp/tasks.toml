@@ -1,0 +1,39 @@
+version = "1.0"
+phase = "1"
+name = "Core Agentic MVP"
+
+[[tasks]]
+id = "P1-1"
+title = "Install LangGraph and dependencies"
+description = "Add dependencies to requirements.txt and verify import."
+done_when = "LangGraph imported successfully inside container"
+
+[[tasks]]
+id = "P1-2"
+title = "Implement RunState model"
+description = "Create src/core/state.py with structured run state."
+done_when = "RunState persisted in SQLite"
+
+[[tasks]]
+id = "P1-3"
+title = "Implement basic orchestrator"
+description = "Create minimal workflow graph with PM -> TL -> QA nodes."
+done_when = "Workflow executes sequentially"
+
+[[tasks]]
+id = "P1-4"
+title = "Implement PlannerTool stub"
+description = "Create tools/planner/tool.py with placeholder methods."
+done_when = "Tool callable without crashing"
+
+[[tasks]]
+id = "P1-5"
+title = "Implement logging module"
+description = "Structured JSONL logs per run."
+done_when = "Logs written to /logs directory"
+
+[[tasks]]
+id = "P1-6"
+title = "Implement Gate A"
+description = "Pause execution awaiting CTO approval."
+done_when = "Workflow stops until approval flag is set"

@@ -1,0 +1,11 @@
+version = "1.0"
+phase = "1"
+
+[acceptance_criteria]
+required = [
+  "Workflow executes inside Docker",
+  "State persisted between runs",
+  "Logs generated per run",
+  "Gate A stops execution until approval",
+  "Minimal PlannerTool structure exists"
+]

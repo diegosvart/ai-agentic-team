@@ -1,0 +1,46 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment and secrets
+.env
+*.env.local
+!.env.example
+!runtime/docker/.env.example
+
+# Logs and artifacts (local runs)
+logs/*.jsonl
+logs/*.log
+artifacts/*
+data/*.db
+!logs/.gitkeep
+!artifacts/.gitkeep
+!data/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/
+
+# Cursor / IDE project state
+.cursor/

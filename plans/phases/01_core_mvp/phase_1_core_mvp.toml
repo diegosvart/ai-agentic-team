@@ -1,0 +1,9 @@
+# Phase 1 – Core MVP
+version = "1.0"
+phase_id = "01_core_mvp"
+name = "Core MVP"
+tasks_file = "tasks.toml"
+acceptance_file = "acceptance.toml"
+
+[meta]
+description = "Grafo orquestador, router LLM y herramientas base"

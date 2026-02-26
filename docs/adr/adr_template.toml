@@ -1,0 +1,17 @@
+# ADR Template
+# Copiar y renombrar para nuevos ADRs (ej. 0002-titulo-corto.toml)
+
+title = "Título del ADR"
+status = "proposed"  # proposed | accepted | deprecated | superseded
+date = ""
+
+[context]
+description = "Contexto y fuerzas en juego."
+
+[decision]
+description = "Decisión tomada."
+
+[consequences]
+positive = []
+negative = []
+neutral = []

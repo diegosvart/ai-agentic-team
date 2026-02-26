@@ -1,0 +1,10 @@
+%% Agentic TI OS – Workflows
+flowchart LR
+    A[Start] --> B[PM]
+    B --> C[Tech Lead]
+    C --> D[Backend]
+    D --> E[QA]
+    E --> F[Security]
+    F --> G{Gates}
+    G -->|pass| H[End]
+    G -->|fail| B
