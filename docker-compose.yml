@@ -1,0 +1,14 @@
+# Agentic TI OS – Docker Compose (root)
+# Delegates to runtime/docker for build context
+# Usage from repo root: docker compose build && docker compose up
+
+services:
+  agentic-ti-os:
+    container_name: agentic-core
+    build:
+      context: .
+      dockerfile: runtime/docker/Dockerfile
+    volumes:
+      - ./src:/app/src
+    stdin_open: true
+    tty: true

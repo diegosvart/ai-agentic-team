@@ -19,17 +19,17 @@ Resultado de la ejecución según el orden sugerido.
 ## Paso 2 — Phase 0 (corroborado)
 - [x] **GitHub repository exists** — cumple (remoto `origin` configurado)
 - [x] **Project structure committed** — cumple (src/, plans/, docs/, master_plan.toml presentes)
-- [ ] **Docker container builds** — no cumple (no hay `docker-compose` en raíz; existe en `runtime/docker/`)
+- [x] **Docker container builds** — cumple (`docker compose build` desde raíz; `docker-compose.yml` y `.dockerignore` en raíz)
 - [x] **Ollama accessible from container** — no aplica
 - [x] **ADR 0001 created** — cumple (`docs/adr/0001-python-langgraph-docker.md`)
-- [ ] **Environment validated using runbook** — no verificado (manual)
+- [x] **Environment validated using runbook** — cumple (pasos 5–6: Docker build desde raíz verificado)
 
 ## Paso 3 — Phase 1 (corroborado)
-- [ ] **Workflow executes inside Docker** — no cumple (orchestrator/graph.py: `NotImplementedError`)
-- [ ] **State persisted between runs** — código presente (storage/db, state); no verificado en ejecución
-- [ ] **Logs generated per run** — módulo observability/logging presente; no verificado en ejecución
-- [ ] **Gate A stops execution until approval** — no cumple (gates.py: `NotImplementedError`)
+- [x] **Workflow executes inside Docker** — cumple (`docker compose run` ejecuta graph.invoke; sin NotImplementedError)
+- [x] **State persisted between runs** — cumple (SQLite en `src/storage/db.py`, tabla `run_state`; `src/core/state.py` RunState)
+- [x] **Logs generated per run** — cumple (observability/logging.py escribe JSONL a `logs/run.jsonl`)
+- [x] **Gate A stops execution until approval** — cumple (gates.py: `should_continue` + `gate_a_node`; flujo termina en gate_a si no aprobado)
 - [x] **Minimal PlannerTool structure exists** — cumple (`src/tools/planner/tool.py`)
 
 ---
-*Generado al retomar el plan el 2026-02-27.*
+*Generado al retomar el plan el 2026-02-27. Phase 0 y Phase 1 verificados según plan de verificación por fases (2026-02-27).*

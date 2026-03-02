@@ -2,4 +2,4 @@
 
 def pm_node(state: dict) -> dict:
     """Project Manager node logic."""
-    return state
+    return {**state, "current_node": "pm"}
