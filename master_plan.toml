@@ -200,6 +200,21 @@ planner = { method = "Microsoft Graph API", purpose = "source_of_truth_work" }
 power_bi = { method = "later_phase", purpose = "analytics_on_planner_and_agent_logs" }
 azure = { method = "tool_wrapper", purpose = "selective deployment/integration" }
 
+[inference]
+mode = "api"
+fallback_enabled = false
+timeout_seconds = 60
+
+[inference.api]
+provider = "openai"
+model = "gpt-4o-mini"
+api_key_env = "OPENAI_API_KEY"
+
+[inference.local]
+provider = "ollama"
+endpoint = "http://localhost:11434"
+model = "mistral"
+
 [phases]
 [phases.phase_0_documentation]
 name = "Documentación completa v1 (Target Architecture + Operating Model)"

@@ -1,2 +1,5 @@
 # Agentic TI OS – Python dependencies
 # Phase 0: minimal for Docker skeleton (no LangGraph yet)
+# Inference: API (default) and local (Ollama)
+openai >= 1.0.0
+tomli >= 2.0.0; python_version < "3.11"

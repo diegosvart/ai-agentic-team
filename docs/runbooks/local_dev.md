@@ -4,7 +4,7 @@ Project: Agentic TI Operating System
 
 Mode: Multi-project
 
-Runtime: Docker + Ollama (host)
+Runtime: Docker + API (default) or Ollama (local)
 
 
 
@@ -26,9 +26,11 @@ Runtime: Docker + Ollama (host)
 
 \- Docker Desktop (running)
 
-\- Ollama (running locally)
+\- **Inference (modo por defecto: API):** variable de entorno `OPENAI_API_KEY` configurada (ver `master_plan.toml` → `[inference.api].api_key_env`). Para usar solo Ollama local, configurar `[inference] mode = "local"` y tener Ollama en ejecución.
 
-\- Cursor or Claude Code
+\- Ollama (opcional; solo si se usa modo local)
+
+\- Cursor o Claude Code
 
 
 
