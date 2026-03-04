@@ -29,10 +29,20 @@ def get_logger(name: str) -> logging.Logger:
 
 
 class JsonFormatter(logging.Formatter):
+    _STANDARD_ATTRS = frozenset({
+        "name", "msg", "args", "created", "filename", "funcName", "levelname", "levelno",
+        "lineno", "module", "msecs", "pathname", "process", "processName", "relativeCreated",
+        "stack_info", "exc_info", "exc_text", "message", "taskName", "thread", "threadName",
+    })
+
     def format(self, record: logging.LogRecord) -> str:
-        return json.dumps({
+        out = {
             "ts": self.formatTime(record),
             "level": record.levelname,
             "name": record.name,
             "message": record.getMessage(),
-        })
+        }
+        for k, v in record.__dict__.items():
+            if k not in self._STANDARD_ATTRS and v is not None:
+                out[k] = v
+        return json.dumps(out)

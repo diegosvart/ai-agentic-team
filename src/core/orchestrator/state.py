@@ -11,3 +11,5 @@ class OrchestratorState(TypedDict, total=False):
     payload: dict[str, Any]
     gate_a_approved: bool
     awaiting_gate_a_approval: bool
+    qa_result: dict[str, Any]
+    security_result: dict[str, Any]

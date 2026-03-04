@@ -19,6 +19,7 @@ def get_provider(config: dict[str, Any]) -> InferenceProvider:
     timeout = inference.get("timeout_seconds", 60)
     fallback_enabled = inference.get("fallback_enabled", False)
 
+    max_retries = inference.get("max_retries", 2)
     try:
         if mode == "api":
             api_cfg = inference.get("api") or {}
@@ -27,6 +28,7 @@ def get_provider(config: dict[str, Any]) -> InferenceProvider:
                 model=api_cfg.get("model", "gpt-4o-mini"),
                 api_key_env=api_cfg.get("api_key_env", "OPENAI_API_KEY"),
                 timeout_seconds=timeout,
+                max_retries=max_retries,
             )
         if mode == "local":
             local_cfg = inference.get("local") or {}
@@ -50,6 +52,7 @@ def get_provider(config: dict[str, Any]) -> InferenceProvider:
                 model=api_cfg.get("model", "gpt-4o-mini"),
                 api_key_env=api_cfg.get("api_key_env", "OPENAI_API_KEY"),
                 timeout_seconds=timeout,
+                max_retries=max_retries,
             )
         raise
 

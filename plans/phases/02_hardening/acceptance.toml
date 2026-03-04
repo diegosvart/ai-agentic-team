@@ -3,5 +3,25 @@ phase = "2"
 
 [[criteria]]
 id = "A2.1"
-description = "TBD"
-met = false
+description = "QA checks integrados: el flujo o un paso post-run ejecuta checks de QA (p. ej. tests) y el resultado queda registrado (log o estado)."
+met = true
+
+[[criteria]]
+id = "A2.2"
+description = "Security checks integrados: el flujo o un paso ejecuta al menos un check de seguridad (deps/secrets o SAST mínimo) y el resultado queda registrado."
+met = true
+
+[[criteria]]
+id = "A2.3"
+description = "Retry y manejo de fallos: existe política de reintentos configurable (orquestador o inferencia) y fallos no detienen el proceso sin registro."
+met = true
+
+[[criteria]]
+id = "A2.4"
+description = "Runbook operativo local: el runbook incluye cómo ejecutar el workflow en Docker, revisar logs y un mínimo de troubleshooting."
+met = true
+
+[[criteria]]
+id = "A2.5"
+description = "Observabilidad y métricas: logs incluyen tool_calls/eval_results (o equivalente), y existe estructura mínima de Run Summary o evidencia por run."
+met = true
