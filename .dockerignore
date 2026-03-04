@@ -1,0 +1,10 @@
+# Exclude from Docker build context (avoid permission / large context)
+.git
+.pytest_cache
+__pycache__
+*.pyc
+.venv
+venv
+.cursor
+.idea
+.vscode

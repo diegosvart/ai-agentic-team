@@ -9,3 +9,7 @@ class OrchestratorState(TypedDict, total=False):
     messages: list[Any]
     current_node: str
     payload: dict[str, Any]
+    gate_a_approved: bool
+    awaiting_gate_a_approval: bool
+    qa_result: dict[str, Any]
+    security_result: dict[str, Any]

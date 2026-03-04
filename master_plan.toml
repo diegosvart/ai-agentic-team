@@ -200,6 +200,25 @@ planner = { method = "Microsoft Graph API", purpose = "source_of_truth_work" }
 power_bi = { method = "later_phase", purpose = "analytics_on_planner_and_agent_logs" }
 azure = { method = "tool_wrapper", purpose = "selective deployment/integration" }
 
+[orchestrator]
+max_retries = 2
+
+[inference]
+mode = "api"
+fallback_enabled = false
+timeout_seconds = 60
+max_retries = 2
+
+[inference.api]
+provider = "openai"
+model = "gpt-4o-mini"
+api_key_env = "OPENAI_API_KEY"
+
+[inference.local]
+provider = "ollama"
+endpoint = "http://localhost:11434"
+model = "mistral"
+
 [phases]
 [phases.phase_0_documentation]
 name = "Documentación completa v1 (Target Architecture + Operating Model)"
@@ -265,6 +284,8 @@ project_identity = "project_id"
 project_sources = ["Planner plan_id", "repo_id", "env_id"]
 shared_services = ["orchestrator", "llm_router", "logging", "policy_module"]
 per_project_overrides = ["tools permissions", "risk policy", "model routing weights", "workflows enabled"]
+# Carpeta base donde la solución crea o genera nuevos proyectos (workspace). Override: env AGENTIC_PROJECTS_OUTPUT_DIR.
+projects_output_dir = "projects"
 
 [next_actions]
 priority = [

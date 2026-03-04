@@ -3,5 +3,25 @@ phase = "3"
 
 [[criteria]]
 id = "A3.1"
-description = "TBD"
-met = false
+description = "Repo piloto definido y al menos 2 flujos ejecutados con entregas repetibles (workflow completo con evidencia por run)."
+met = true
+
+[[criteria]]
+id = "A3.2"
+description = "Existe comparación baseline vs agent-assisted (métrica de tiempo, pasos o checklist manual vs asistido)."
+met = true
+
+[[criteria]]
+id = "A3.3"
+description = "Reporte de valor generado: evidencia (enlaces a Run Summaries / evidence) y métricas (tiempo, resultados QA/Sec, número de runs)."
+met = true
+
+[[criteria]]
+id = "A3.4"
+description = "Criterios para ampliar autonomía en tareas de bajo riesgo documentados y alineados al plan maestro."
+met = true
+
+[[criteria]]
+id = "A3.5"
+description = "Configuración de carpeta para nuevos proyectos: la solución dispone de una opción que indica dónde crear/generar nuevos proyectos (workspace)."
+met = true

@@ -3,6 +3,43 @@ phase = "3"
 name = "Real Pilot Tasks"
 
 [[tasks]]
-id = "3.1"
-title = "TBD"
-status = "pending"
+id = "P3-0"
+title = "Configuración de carpeta para nuevos proyectos"
+description = "Añadir projects_output_dir en master_plan.toml; documentar AGENTIC_PROJECTS_OUTPUT_DIR; código que cree proyectos usa esta ruta."
+done_when = "Config en TOML; override env documentado; punto de uso (stub/CLI) lee la ruta."
+status = "completed"
+
+[[tasks]]
+id = "P3-1"
+title = "Definir repo y alcance del piloto"
+description = "Repo piloto identificado; documentado en docs/pilot/alcance.md; 2–3 flujos definidos."
+done_when = "alcance.md con pilot_repo y flujos."
+status = "completed"
+
+[[tasks]]
+id = "P3-2"
+title = "Ejecutar 2–3 flujos con evidencia"
+description = "Al menos 2 ejecuciones completas del workflow (gate aprobado hasta QA) con Run Summary y evidence."
+done_when = "2+ runs con logs/ y evidence."
+status = "completed"
+
+[[tasks]]
+id = "P3-3"
+title = "Capturar baseline y métricas agent"
+description = "Definir baseline; por cada run registrar tiempo, pasos, resultado QA/Sec."
+done_when = "Artefacto o doc con métricas comparativas."
+status = "completed"
+
+[[tasks]]
+id = "P3-4"
+title = "Redactar reporte de valor"
+description = "docs/pilot/reporte_valor_phase3.md con evidencia, métricas, conclusiones."
+done_when = "Archivo creado con secciones requeridas."
+status = "completed"
+
+[[tasks]]
+id = "P3-5"
+title = "Documentar criterios de autonomía"
+description = "docs/pilot/criterios_autonomia.md basado en evaluation y autonomy_promotion_rules."
+done_when = "Documento con criterios verificables."
+status = "completed"

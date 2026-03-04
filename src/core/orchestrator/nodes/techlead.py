@@ -2,4 +2,4 @@
 
 def techlead_node(state: dict) -> dict:
     """Tech Lead node logic."""
-    return state
+    return {**state, "current_node": "techlead"}

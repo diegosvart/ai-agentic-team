@@ -3,6 +3,36 @@ phase = "2"
 name = "Hardening Tasks"
 
 [[tasks]]
-id = "2.1"
-title = "TBD"
-status = "pending"
+id = "P2-1"
+title = "Implementar QA tool mínimo"
+description = "Ejecutar tests (p. ej. pytest), devolver resultado estructurado (passed/failed, contadores); invocable desde nodo QA o paso post-run."
+done_when = "qa_tool ejecuta pytest y retorna { ok, passed, failed, output }; nodo QA o paso lo invoca y registra."
+status = "completed"
+
+[[tasks]]
+id = "P2-2"
+title = "Implementar Security tool mínimo"
+description = "Al menos una acción: check_deps (pip audit/safety) o check_secrets; resultado estructurado; invocable desde nodo Security o paso."
+done_when = "security_tool expone check_deps o check_secrets con { ok, findings, summary }; integrado en flujo."
+status = "completed"
+
+[[tasks]]
+id = "P2-3"
+title = "Añadir retry y failure handling"
+description = "Configuración de reintentos (master_plan.toml o env) para inferencia o tools; en fallo registrar y marcar estado."
+done_when = "max_retries configurable; reintentos en provider.generate o tools; fallo registrado y estado controlado."
+status = "completed"
+
+[[tasks]]
+id = "P2-4"
+title = "Runbook operativo local"
+description = "Ampliar local_dev.md con sección Operación local: ejecutar workflow en Docker, logs, re-ejecutar, checklist salud."
+done_when = "Runbook incluye comando docker compose run, ubicación logs, troubleshooting mínimo."
+status = "completed"
+
+[[tasks]]
+id = "P2-5"
+title = "Observabilidad: tool_calls, evidence, Run Summary"
+description = "Logging tool_calls/eval_results; record_evidence persistente; estructura Run Summary (run_id, status, steps, timestamps)."
+done_when = "Logs con tool_calls/eval_results; record_evidence escribe JSONL o SQLite; build_run_summary o equivalente."
+status = "completed"
