@@ -34,6 +34,11 @@ export interface Config {
   llmMode: 'live' | 'mock';
   models: Record<ModelTier, string>;
   mockStepDelayMs: number;
+  /**
+   * Origenes externos autorizados a llamar a la API (CORS). El mismo origen siempre se admite.
+   * Sin login, cualquier otro origen queda bloqueado. Por defecto, el servidor de Vite.
+   */
+  corsOrigins?: string[];
 }
 
 // ---------- Persistencia ----------
@@ -94,7 +99,7 @@ export interface Store {
   updateActionRun(
     tenantId: string,
     id: string,
-    patch: Partial<Pick<ActionRun, 'status' | 'result' | 'error' | 'resolvedAt'>>,
+    patch: Partial<Pick<ActionRun, 'status' | 'result' | 'error' | 'note' | 'resolvedAt'>>,
   ): ActionRun;
   listActionRuns(tenantId: string, filter?: { taskId?: string; status?: ActionRunStatus }): ActionRun[];
 }

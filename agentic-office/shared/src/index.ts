@@ -133,6 +133,8 @@ export interface ActionRun {
   status: ActionRunStatus;
   result: unknown;
   error: string | null;
+  /** Nota que el usuario escribio al aprobar o rechazar (se le entrega al agente). */
+  note: string | null;
   createdAt: string;
   resolvedAt: string | null;
 }
