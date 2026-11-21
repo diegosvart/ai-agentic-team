@@ -412,7 +412,7 @@ var TASKS=[
  {id:'r4b',p:'r4',a:'finanzas',t:'Emitir nota de crédito',s:'failed'}
 ];
 var RUNS=[
- {id:'x1',tk:'r1a',a:'finanzas',n:'Emitir factura de ajuste',pr:{Cliente:'Nubia Ltda.',Monto:'$1.240.000 CLP'},s:'pending_approval',note:'',at:'10:42'},
+ {id:'x1',tk:'r1a',a:'finanzas',n:'Emitir factura de ajuste',pr:{Cliente:'Nubia Ltda.',Monto:'$1.240.000 CLP'},pol:'U-01',reqNote:true,s:'pending_approval',note:'',at:'10:42'},
  {id:'x2',tk:'r2c',a:'comercial',n:'Enviar oferta de renovación',pr:{Cliente:'Alerce S.A.',Descuento:'8 %'},s:'pending_approval',note:'',at:'10:58'},
  {id:'x3',tk:'r3b',a:'operaciones',n:'Crear cuenta y accesos',pr:{Persona:'Valentina Soto',Ingreso:'1 dic'},s:'pending_approval',note:'',at:'11:05'},
  {id:'x4',tk:'r2d',a:'marketing',n:'Enviar boletín a lista completa',pr:{Destinatarios:'412',Asunto:'Tu renovación con Aster'},s:'pending_approval',note:'',at:'11:12'},
@@ -421,10 +421,14 @@ var RUNS=[
  {id:'x7',tk:'r4b',a:'finanzas',n:'Emitir nota de crédito',pr:{Cliente:'Alerce S.A.'},s:'failed',note:'',err:'El cliente no tiene identificador tributario registrado.',at:'09:51'},
  {id:'x8',tk:'r2b',a:'marketing',n:'Publicar comunicado en redes',pr:{Canal:'Redes'},s:'rejected',note:'Falta la revisión legal.',at:'08:30'}
 ];
-var DAY=[
- ['Correo',[['Leer y triar la bandeja de entrada (23 sin leer)',1],['Responder a 3 clientes clave',0],['Derivar 5 correos al área correspondiente',0]]],
- ['Pendientes del día',[['Aprobar presupuesto de capacitación',0],['Confirmar agenda de la semana',1],['Firmar acta del comité de dirección',0]]],
- ['Tareas de los agentes',[['Revisar solicitudes en curso',0],['Revisar la tarea fallida: nota de crédito de Alerce S.A.',0]]]
+var AG_ST2={scheduled:['Programada','t-info','◷'],due:['Por lanzar','t-warn','!'],running:['En curso','t-acc','▶'],waiting_approval:['Espera aprobación','t-warn','⏸'],done:['Hecha','t-ok','✓'],failed:['Fallida','t-bad','✕'],skipped:['Omitida','','⤼'],missed:['Perdida','t-bad','!']};
+var AGENDA=[
+ ['R-DIR-03b','Revisar tareas de los agentes (cierre de ayer)','Ayer 17:00','missed',1],
+ ['R-DIR-01','Leer y triar correo','08:30','done',0],
+ ['R-DIR-02','Resolver pendientes del día','09:00','running',0],
+ ['R-DIR-04a','Preparar aprobaciones','10:00','waiting_approval',0],
+ ['R-DIR-03a','Revisar tareas de los agentes','12:30','due',0],
+ ['R-DIR-05','Informe de cierre del día','17:45','scheduled',0]
 ];
 var SPARK=[2,3,2,5,4,6,5,8,7,9,6,7];
 
@@ -473,7 +477,6 @@ var SPARK=[2,3,2,5,4,6,5,8,7,9,6,7];
 var state='closed', trigger=null, timers=[], active=0, procArea='all', openArea=null, expanded={r1:1,r2:1,r3:1,r4:0};
 var app=$('#app'), hud=$('#hud'), ceo=$('#ceoBtn'), rmSw=$('#rmSwitch');
 var mq=window.matchMedia('(prefers-reduced-motion: reduce)');
-var dayState=[];DAY.forEach(function(g,gi){g[1].forEach(function(it,ii){dayState[gi+'-'+ii]=!!it[1];});});
 var tick=0;
 function reduced(){return mq.matches||rmSw.checked;}
 function applyRM(){document.documentElement.classList.toggle('rm',reduced());}
@@ -573,16 +576,17 @@ function renderFicha(el,a){
   $$('[data-del]',el).forEach(function(b){b.onclick=function(){stub('confirmar el borrado de la acción '+b.dataset.del);};});
 }
 
-/* 03 Mi día */
+/* 03 Mi día (vista de agenda: estados AgendaStatus, SPEC modelo de procesos 3 y 5.4) */
 function renderDay(){
-  var el=$('#panel-2'),n=0,done=0,html='';
-  DAY.forEach(function(g,gi){html+='<h4 class="group-title">'+g[0]+'</h4><ul class="grid">'+g[1].map(function(it,ii){n++;if(dayState[gi+'-'+ii])done++;var id='d-'+gi+'-'+ii;return '<li class="card check"><input type="checkbox" id="'+id+'" data-k="'+gi+'-'+ii+'"'+(dayState[gi+'-'+ii]?' checked':'')+'><label for="'+id+'">'+esc(it[0])+'</label></li>';}).join('')+'</ul>';});
-  var m=metrics();
-  html+='<h4 class="group-title">Ejecuciones</h4><ul class="grid"><li class="card check" style="align-items:center"><span class="grow" style="flex:1">Aprobar ejecuciones pendientes: <strong id="dayPend">'+m.pend+'</strong></span><button type="button" class="btn btn-sm btn-primary" id="goRuns">Ir a aprobaciones</button></li></ul>';
-  el.innerHTML=head(2,'Lo que te toca hoy como CEO. Marca lo que ya hiciste.')+'<div class="row between small"><span id="dayTxt"></span></div><div class="progress" aria-hidden="true"><i id="dayBar"></i></div>'+html;
-  function upd(){var d=0;for(var k in dayState)if(dayState[k])d++;var tot=Object.keys(dayState).length;$('#dayTxt').textContent=d+' de '+tot+' pendientes personales resueltos';$('#dayBar').style.width=(d*100/tot)+'%';}
-  upd();
-  $$('input[type=checkbox]',el).forEach(function(c){c.onchange=function(){dayState[c.dataset.k]=c.checked;upd();announce((c.checked?'Marcada como hecha: ':'Marcada como pendiente: ')+c.nextElementSibling.textContent+'.');};});
+  var el=$('#panel-2'),m=metrics(),done=AGENDA.filter(function(a){return a[3]==='done'||a[3]==='skipped'}).length;
+  function row(a,i){var can=a[3]==='due'||a[3]==='missed';return '<li class="card check" style="align-items:center"><span class="n t-acc" style="font:700 13px var(--mono)">'+String(i+1).padStart(2,'0')+'</span><span style="flex:1"><strong>'+esc(a[1])+'</strong><span class="small muted"> · '+a[0]+' · '+a[2]+'</span></span>'+badge(AG_ST2,a[3])+(can?'<button type="button" class="btn btn-sm btn-ghost" data-run="'+a[0]+'" aria-label="Lanzar ahora '+esc(a[1])+'">Lanzar ahora</button>':'')+'</li>';}
+  var late=AGENDA.filter(function(a){return a[4]}),today=AGENDA.filter(function(a){return !a[4]});
+  el.innerHTML=head(2,'La agenda del CEO: tareas recurrentes R-DIR con su estado. Las automáticas las lanza el sistema; las manuales, tú.')+
+   '<div class="small" id="dayTxt">'+done+' de '+AGENDA.length+' resueltas</div><div class="progress" aria-hidden="true"><i id="dayBar" style="width:'+(done*100/AGENDA.length)+'%"></i></div>'+
+   '<h4 class="group-title">Atrasadas</h4><ul class="grid">'+late.map(row).join('')+'</ul>'+
+   '<h4 class="group-title">Hoy</h4><ul class="grid">'+today.map(function(a,i){return row(a,i)}).join('')+'</ul>'+
+   '<h4 class="group-title">Ejecuciones</h4><ul class="grid"><li class="card check" style="align-items:center"><span style="flex:1">Aprobar ejecuciones pendientes: <strong id="dayPend">'+m.pend+'</strong></span><button type="button" class="btn btn-sm btn-primary" id="goRuns">Ir a aprobaciones</button></li></ul>';
+  $$('[data-run]',el).forEach(function(b){b.onclick=function(){var a=AGENDA.filter(function(x){return x[0]===b.dataset.run})[0];a[3]='running';renderDay();$('#h-2').focus();announce('Lanzada: '+a[1]+'. Estado: en curso.');};});
   $('#goRuns').onclick=function(){selectTab(4,true);};
 }
 
@@ -604,13 +608,14 @@ function renderRuns(focusNext){
   var el=$('#panel-4'),pend=RUNS.filter(function(r){return r.s==='pending_approval'}),hist=RUNS.filter(function(r){return r.s!=='pending_approval'}).sort(function(a,b){return b.at<a.at?-1:1});
   el.innerHTML=head(4,'Bandeja de aprobaciones e historial de ejecuciones de hoy.')+
    '<h4 class="group-title" id="inboxT" tabindex="-1" style="margin-top:0">Bandeja · '+pend.length+(pend.length===1?' pendiente':' pendientes')+'</h4>'+
-   (pend.length?'<ul class="grid">'+pend.map(function(r,i){var a=area(r.a);return '<li class="card run" data-id="'+r.id+'"><h4><span class="n">'+String(i+1).padStart(2,'0')+'</span><span id="rt-'+r.id+'">'+esc(r.n)+'</span></h4><div class="row small muted"><span class="dot" style="background:'+a.c+'" aria-hidden="true"></span>'+esc(a.ag)+' · '+esc(a.n)+' · solicitada a las '+r.at+'</div><div class="params">'+Object.keys(r.pr).map(function(k){return '<span>'+esc(k)+': <b>'+esc(r.pr[k])+'</b></span>';}).join('')+'</div><label class="note-label" for="note-'+r.id+'">Nota (opcional)</label><textarea id="note-'+r.id+'" rows="2" placeholder="Se la entregamos al agente"></textarea><div class="actions"><button type="button" class="btn btn-primary btn-sm" data-ok="'+r.id+'" aria-label="Aprobar '+esc(r.n)+'">Aprobar</button><button type="button" class="btn btn-danger btn-sm" data-no="'+r.id+'" aria-label="Rechazar '+esc(r.n)+'">Rechazar</button></div></li>';}).join('')+'</ul>':'<p class="empty" id="emptyInbox" tabindex="-1">No hay ejecuciones pendientes. Buen trabajo.</p>')+
+   (pend.length?'<ul class="grid">'+pend.map(function(r,i){var a=area(r.a);return '<li class="card run" data-id="'+r.id+'"><h4><span class="n">'+String(i+1).padStart(2,'0')+'</span><span id="rt-'+r.id+'">'+esc(r.n)+'</span></h4><div class="row small muted"><span class="dot" style="background:'+a.c+'" aria-hidden="true"></span>'+esc(a.ag)+' · '+esc(a.n)+' · solicitada a las '+r.at+'</div><div class="params">'+Object.keys(r.pr).map(function(k){return '<span>'+esc(k)+': <b>'+esc(r.pr[k])+'</b></span>';}).join('')+'</div><label class="note-label" for="note-'+r.id+'">'+(r.reqNote?'Nota (obligatoria para aprobar, política '+r.pol+')':'Nota (opcional)')+'</label><textarea id="note-'+r.id+'" rows="2" placeholder="Se la entregamos al agente"'+(r.reqNote?' aria-required="true"':'')+' aria-describedby="err-'+r.id+'"></textarea><p class="small t-bad" id="err-'+r.id+'" role="alert" hidden>Esta ejecución exige una nota para aprobarla (la API respondería 400). Puedes rechazar sin nota.</p><div class="actions"><button type="button" class="btn btn-primary btn-sm" data-ok="'+r.id+'" aria-label="Aprobar '+esc(r.n)+'">Aprobar</button><button type="button" class="btn btn-danger btn-sm" data-no="'+r.id+'" aria-label="Rechazar '+esc(r.n)+'">Rechazar</button></div></li>';}).join('')+'</ul>':'<p class="empty" id="emptyInbox" tabindex="-1">No hay ejecuciones pendientes. Buen trabajo.</p>')+
    '<h4 class="group-title">Historial de hoy</h4><ul class="hist">'+hist.map(function(r){return '<li><span><strong>'+esc(r.n)+'</strong> · '+esc(area(r.a).ag)+' · '+r.at+'</span>'+badge(R_ST,r.s)+(r.err?'<span class="sub">Error: '+esc(r.err)+'</span>':'')+(r.note?'<span class="sub">Nota: '+esc(r.note)+'</span>':'')+'</li>';}).join('')+'</ul>';
   $$('[data-ok]',el).forEach(function(b){b.onclick=function(){resolve(b.dataset.ok,true);};});
   $$('[data-no]',el).forEach(function(b){b.onclick=function(){resolve(b.dataset.no,false);};});
 }
 function resolve(id,ok){
   var r=RUNS.filter(function(x){return x.id===id})[0],note=$('#note-'+id).value.trim(),idx=RUNS.filter(function(x){return x.s==='pending_approval'}).indexOf(r);
+  if(ok&&r.reqNote&&!note){var er=$('#err-'+id),ta=$('#note-'+id);er.hidden=false;ta.setAttribute('aria-invalid','true');ta.focus();announce('No se puede aprobar sin nota: la política '+r.pol+' la exige.');return;}
   r.s=ok?'succeeded':'rejected';r.note=note;r.at=new Date().toTimeString().slice(0,5);
   var t=TASKS.filter(function(x){return x.id===r.tk})[0];if(t)t.s=ok?'completed':'failed';
   var ag=area(r.a);if(ag&&!RUNS.some(function(x){return x.a===r.a&&x.s==='pending_approval'})&&ag.st==='waiting_approval')ag.st=ok?'working':'idle';

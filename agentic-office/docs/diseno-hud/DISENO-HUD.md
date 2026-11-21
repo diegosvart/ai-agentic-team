@@ -87,11 +87,11 @@ Un solo easing, `cubic-bezier(.2,.75,.2,1)`. Dolly de 800 ms, paneles de 600 ms 
 
 | # | Módulo | Contenido | Interacción |
 |---|---|---|---|
-| 01 | Procesos y tareas | Chips por área (filtro, `aria-pressed`) y tarjetas numeradas por proceso: frecuencia, próxima ejecución, responsable y tareas recurrentes | Filtrar por área. En el prototipo es solo lectura. |
+| 01 | Procesos y tareas | Chips por área (filtro, `aria-pressed`) y tarjetas numeradas por proceso (`Process`): frecuencia, próxima ejecución, responsable y tareas recurrentes (`RecurringTask`) | Filtrar por área. En el prototipo es solo lectura. |
 | 02 | Áreas de la compañía | Rejilla de 8 tarjetas: área, agente a cargo, estado, tareas activas, sparkline. Al abrir un área, se muestra la **ficha** (datos, descripción, acciones, actividad reciente) | "Abrir área" y "Volver" (el foco vuelve a la tarjeta). Botones de agente y acción. |
-| 03 | Tareas del día del CEO | Checklist agrupada (Correo, Pendientes, Tareas de los agentes) con barra de avance, más una fila derivada "Aprobar ejecuciones pendientes: N" con acceso a 05 | Marcar/desmarcar. "Ir a aprobaciones" salta al módulo 05. |
+| 03 | Tareas del día del CEO | Agenda R-DIR-01…05 con código, hora y estado `AgendaStatus` (icono + texto), grupos "Atrasadas" y "Hoy", barra de avance (hechas u omitidas / total) y una fila "Aprobar ejecuciones pendientes: N" con acceso a 05 | "Lanzar ahora" en las tareas por lanzar o perdidas (pasan a "En curso"). "Ir a aprobaciones" salta al módulo 05. |
 | 04 | Tareas de los agentes | Árbol solicitud → subtareas, con agente, estado (icono + texto) y ejecuciones asociadas. Leyenda de estados. | Expandir/contraer con botones `aria-expanded`. |
-| 05 | Ejecuciones y aprobaciones | Bandeja de pendientes (parámetros, nota opcional, Aprobar/Rechazar) e historial del día con nota y error | Resolver en memoria: actualiza contadores, gauges, árbol y estado del agente, y mueve el foco a la siguiente tarjeta |
+| 05 | Ejecuciones y aprobaciones | Bandeja de pendientes (parámetros, nota opcional u obligatoria según `requireNote` y política `policyId`, Aprobar/Rechazar) e historial del día con nota y error | Resolver en memoria: actualiza contadores, gauges, árbol y estado del agente, y mueve el foco a la siguiente tarjeta. Aprobar sin nota cuando es obligatoria muestra un error, mantiene la tarjeta y enfoca la nota. |
 
 ## 4. Mapeo de lo actual a los módulos nuevos
 
@@ -100,7 +100,7 @@ Cada fila se verificó contra `web/src/panels/` de la copia de solo lectura del 
 | Hoy | Función | Dónde queda |
 |---|---|---|
 | Pestaña **Actividad** | Árbol de la solicitud con sus subtareas, estado, modelo, complejidad y resultado | **04** Tareas de los agentes. Cada nodo se expande para ver detalle (modelo, complejidad, resultado, error, ejecuciones). Los badges de modelo y complejidad pasan al detalle del nodo. |
-| Pestaña **Aprobaciones** | Bandeja con aprobar/rechazar, nota opcional e historial | **05** Ejecuciones y aprobaciones, con el mismo flujo e historial. El contador de pendientes pasa a un distintivo sobre el hexágono 05 y al gauge. |
+| Pestaña **Aprobaciones** | Bandeja con aprobar/rechazar, nota opcional e historial | **05** Ejecuciones y aprobaciones, con el mismo flujo e historial, más la nota obligatoria cuando `requireNote` es verdadero (SPEC §5.3). El contador de pendientes pasa a un distintivo sobre el hexágono 05 y al gauge. |
 | Pestaña **Equipo** | Lista de agentes; alta, edición y borrado (con confirmación) de agentes; estado y modelo | **02** Áreas. Cada área muestra su agente. "Nuevo agente" va en la cabecera del módulo. "Editar agente" y "Borrar agente" van en la ficha. El formulario de agente (`AgentForm`) y la confirmación de borrado se reutilizan tal cual, dentro del módulo. |
 | Pestaña **Acciones** | Lista y CRUD de acciones: parámetros, enum, conector, requiere aprobación, habilitada | **02**, en la ficha del agente dueño: sección "Acciones" con "Nueva acción", "Editar" y "Borrar" por fila. El formulario completo (`ActionForm`) se reutiliza. |
 | **Ficha del agente** (`AgentDetail`) | Estado, acciones, tareas y ejecuciones recientes | **02**, vista de ficha del área. Se agrega el atajo "ver sus tareas" hacia 04 (a definir en implementación). |
@@ -108,7 +108,19 @@ Cada fila se verificó contra `web/src/panels/` de la copia de solo lectura del 
 | Selección de agente en la oficina (hover/tooltip/clic sobre personajes) | Abre la ficha | Se conserva. El clic en el CEO abre el HUD. El clic en otro personaje puede abrir el HUD directo en la ficha de su área (**punto de integración a verificar**). |
 | Tiempo real (SSE `/api/events`) | Actualiza actividad y aprobaciones | Los mismos datos alimentan 04, 05 y los gauges. El prototipo usa estado en memoria. |
 
-Funciones nuevas (no existen hoy): módulo 01 Procesos y tareas recurrentes, y módulo 03 Tareas del día del CEO. Necesitan modelo de datos y endpoints propios (ver riesgos y preguntas abiertas).
+Funciones nuevas (no existen hoy en el MVP): módulo 01 Procesos y tareas recurrentes, y módulo 03 Tareas del día del CEO. Ya tienen modelo y API en el SPEC del modelo de procesos ([`../modelo-procesos/SPEC.md`](../modelo-procesos/SPEC.md); procesos en [`PROCESOS.md`](../modelo-procesos/PROCESOS.md)):
+
+### 4.1 Fuentes de datos por módulo
+
+| Módulo | Datos | Tipos (SPEC §3) | Endpoints (SPEC §6) |
+|---|---|---|---|
+| 01 Procesos y tareas | Procesos por área y sus tareas recurrentes (código, modo manual/automático, hora, frecuencia) | `Process`, `RecurringTask` | `GET /api/processes` (filtro `?areaId=`), `GET /api/recurring-tasks` (filtros `?agentId=`, `?processId=`). Acciones "Lanzar ahora" y "Omitir": `POST /api/recurring-tasks/:id/run` y `/skip`. |
+| 02 Áreas | Área, agente a cargo y su estado | `Area` (`StateResponse.areas`), `Agent` (con `areaId` y `reportsToAgentId`) | `GET /api/state`, `GET/POST /api/areas`, `PATCH/DELETE /api/areas/:id`, `POST/PATCH /api/agents` |
+| 03 Tareas del día del CEO | Vista calculada de la agenda: las recurrentes R-DIR-01 a R-DIR-05 de PROCESOS §6.1 (leer y triar correo, resolver pendientes, revisar tareas de los agentes, preparar aprobaciones, informe de cierre), más las atrasadas | `AgendaResponse`, `AgendaItem`, `AgendaStatus` (`scheduled`, `due`, `running`, `waiting_approval`, `done`, `failed`, `skipped`, `missed`) | `GET /api/agenda?date=AAAA-MM-DD` (§5.4) |
+| 04 Tareas de los agentes | Árbol solicitud → subtareas | `Task` (con `?origin=recurring` y `?processId=`), `ActionRun` | `GET /api/tasks`, SSE `/api/events` |
+| 05 Ejecuciones y aprobaciones | Bandeja e historial; política que aplicó y si exige nota | `ActionRun` (campos `policyId`, `requireNote`, `resolvedBy`), `ApprovalPolicy` | `GET /api/approvals`, `POST /api/action-runs/:id/approve` (400 si `requireNote` y la nota viene vacía; rechazar no exige nota, SPEC §5.3), `GET/POST /api/approval-policies` |
+
+Consecuencias de diseño: el módulo 03 **no** es una checklist que el humano marca; es la agenda calculada, con estados de `AgendaStatus`. Las tareas automáticas las lanza el programador; las manuales aparecen como "Por lanzar" con el botón "Lanzar ahora". Las perdidas (`missed`) se muestran en "Atrasadas". El módulo 05 exige nota para **aprobar** cuando `requireNote` es verdadero, y no para rechazar.
 
 Lo que el prototipo **no** reimplementa: los formularios de agente y de acción. Sus botones solo anuncian "aquí se abriría el formulario". El botón "Borrar agente" aparece deshabilitado únicamente para mostrar ese estado visual; la regla real de cuándo se puede borrar es una pregunta abierta.
 
@@ -160,7 +172,7 @@ Nada de esto existe en este checkout; hay que confirmarlo en `web/src/office3d/s
 **Diálogo.** `role="dialog"`, `aria-modal="true"`, `aria-labelledby` apunta al título (`h2`). Mientras está abierto, la escena y su control quedan `inert`, y un listener de `Tab` atrapa el foco dentro del HUD. El foco inicial va a la pestaña del módulo activo.
 
 **Lector de pantalla.**
-- Región `aria-live="polite"` dentro del diálogo para: apertura ("Centro de mando abierto. Módulo 1 de 5…"), cambio de módulo, resolución de aprobación ("Aprobada: … Quedan 3 aprobaciones pendientes"), marcar tareas del día y envío de solicitudes. Una segunda región fuera del diálogo anuncia el cierre.
+- Región `aria-live="polite"` dentro del diálogo para: apertura ("Centro de mando abierto. Módulo 1 de 5…"), cambio de módulo, resolución de aprobación ("Aprobada: … Quedan 3 aprobaciones pendientes"), rechazo de una aprobación sin la nota obligatoria, lanzamiento de tareas de la agenda y envío de solicitudes. Una segunda región fuera del diálogo anuncia el cierre.
 - Pestañas con nombre accesible por contenido ("05 Ejecuciones, 2 pendientes").
 - Estados: icono (oculto a lectores) más texto siempre.
 - Gauges: el SVG es `aria-hidden`; la información está en texto real ("4 de 17 tareas completadas").
@@ -179,7 +191,7 @@ Nada de esto existe en este checkout; hay que confirmarlo en `web/src/office3d/s
 | Texto atenuado (subtítulo) | 10,51 | Chip activo / inactivo | 11,94 / 15,33 |
 | Texto atenuado en tarjeta | 8,95 | Badges advertencia / ok / peligro | 11,99 / 10,85 / 8,88 |
 | Etiqueta de gauge / subtexto | 16,84 / 10,51 | Indicador Simulación | 12,58 |
-| Pestaña inactiva / activa | 10,51 / 11,25 | Contador de la pestaña 5 | 11,25 |
+| Pestaña inactiva / activa | 10,51 / 18,43 | Contador de la pestaña 5 | 11,25 |
 | Número del hexágono activo | 11,94 | Texto del campo | 17,23 |
 
 El mínimo es 8,88:1 (requisito: 4,5:1; 3:1 para texto grande y componentes).
@@ -229,8 +241,8 @@ Lectura: quitando datos y escena, la lógica y las plantillas rondan 21,5 KB de 
 
 **Preguntas abiertas**
 
-1. ¿Los "procesos y tareas recurrentes" (módulo 01) y las "tareas del día del CEO" (módulo 03) tendrán modelo de datos y endpoints propios, o se derivan de las `Task` existentes? Hoy no existen en `shared`.
-2. ¿Quién ejecuta las tareas recurrentes y quién marca una tarea del día como hecha: solo el humano, o también el CEO agente?
+1. ~~¿Modelo de datos de los módulos 01 y 03?~~ **Resuelta**: ya existe en el SPEC del modelo de procesos (sección 4.1 de este documento). Queda pendiente confirmar que la implementación respete esos contratos (`Process`, `RecurringTask`, `AgendaResponse`, `Area`, `ApprovalPolicy`).
+2. ~~¿Quién marca una tarea del día como hecha?~~ **Resuelta**: nadie la marca; el estado se calcula (`AgendaStatus`, SPEC §5.4). Las R-DIR las ejecuta el CEO agente; el humano solo lanza las manuales ("Lanzar ahora") o las omite (`/skip`).
 3. ¿El clic en otros personajes (no CEO) debe abrir el HUD en su ficha de área, o mantener la ficha actual?
 4. ¿Se permite borrar al CEO o a un agente con aprobaciones pendientes? (El prototipo solo muestra el estado deshabilitado.)
 5. ¿La precarga del chunk va en el primer clic (más simple, posible espera) o en reposo (mejor sensación, consume red)?
@@ -249,7 +261,7 @@ Lectura: quitando datos y escena, la lógica y las plantillas rondan 21,5 KB de 
 | H-06 | Módulo 05 Ejecuciones y aprobaciones (migra `ApprovalsPanel`) y módulo 04 Tareas de los agentes (migra `ActivityPanel`) | Paridad funcional con las pestañas actuales | H-04 |
 | H-07 | Módulo 02 Áreas con ficha, y migración de `TeamPanel`, `ActionsPanel` y `AgentDetail` (CRUD completo) | Paridad funcional del CRUD de agentes y acciones | H-04 |
 | H-08 | Barra de solicitud al CEO fija dentro del HUD (migra `RequestBar`) | Solicitud desde cualquier módulo | H-04 |
-| H-09 | Módulos 01 y 03: definir modelo de datos y endpoints (según preguntas 1 y 2), y construir las vistas | Módulos nuevos con datos reales | H-04, decisión de producto |
+| H-09 | Módulos 01 y 03: construir las vistas sobre `GET /api/processes`, `/api/recurring-tasks` y `/api/agenda` (SPEC del modelo de procesos), incluida la nota obligatoria en 05 | Módulos nuevos con datos reales | H-04, implementación del modelo de procesos |
 | H-10 | Retiro del panel derecho de pestañas y limpieza del código antiguo | App sin duplicidad | H-06, H-07, H-08 |
 | H-11 | Verificación: pruebas de teclado y axe en CI, presupuesto de tamaño por chunk, pruebas con lectores de pantalla y en dispositivo móvil real | Lista de verificación cumplida | H-05 a H-10 |
 
@@ -262,5 +274,7 @@ Con Playwright (Chromium) sobre el HTML abierto desde archivo:
 - Movimiento reducido: sin clase `dolly`, transición de la escena en 0 s, animaciones de paneles y líneas en `none`, fundido de 0,12 s.
 - 390 px de ancho: sin desbordamiento horizontal en la oficina ni en los cinco módulos.
 - axe-core 0 violaciones; contraste calculado (sección 7).
+
+Tras integrar el modelo de procesos se repitió la verificación (consola sin mensajes, flujo de teclado, axe con 0 violaciones en los cinco módulos, sin desbordamiento a 390 px) y se probó que aprobar sin nota la ejecución con `requireNote` no la resuelve (muestra el error y enfoca la nota), mientras que rechazarla sin nota y aprobar otra sin `requireNote` sí funcionan.
 
 No verificado: lectores de pantalla reales, Windows con alto contraste real, rendimiento en equipos modestos, integración con el 3D real.
