@@ -1,6 +1,6 @@
 # PLAN — Modelo de procesos (M-00…M-10)
 
-Implementa [SPEC.md](SPEC.md) (revisión 2). Método igual al de `plan-oficina-v2` (ver su LOOP.md §6):
+Implementa [SPEC.md](SPEC.md) (revisión 3). Método igual al de `plan-oficina-v2` (ver su LOOP.md §6):
 
 - **Orquestador:** Opus. Integra con `merge --no-ff` en la rama de integración y no hace push sin
   permiso del usuario.
@@ -20,9 +20,9 @@ Implementa [SPEC.md](SPEC.md) (revisión 2). Método igual al de `plan-oficina-v
 
 | Id | Entregable | Estado |
 |----|------------|--------|
-| E-01 | PROCESOS.md | Revisión 2 (ciclo 1: 70; ciclo 2: 76). Escalado al usuario por la regla de dos rechazos |
-| E-02 | SPEC.md | Revisión 2 (cambios en SPEC §12) |
-| E-03 | PLAN.md (este archivo) | Revisión 2 |
+| E-01 | PROCESOS.md | Revisión 3 (ciclos: 70, 76 y 83). El usuario pidió el tercer ciclo; el cuarto lo decide el usuario |
+| E-02 | SPEC.md | Revisión 3 (cambios en SPEC §12) |
+| E-03 | PLAN.md (este archivo) | Revisión 3 |
 
 Las preguntas abiertas Q1–Q3 de PROCESOS.md se cierran con el usuario antes de la Ola 1.
 
@@ -65,13 +65,14 @@ Ola 7: M-10
 ### M-02 · Store: tablas, migración y CRUD
 - Archivos:
   - `server/src/store/index.ts`;
-  - `server/src/contracts.ts`: interfaz `Store` con `createTask` ampliado, `updateTask` con
-    `context`, `materializeOccurrence`, `relaunchOccurrence`, `listTenants` y filtros de
-    `listRootTasks`;
+  - `server/src/contracts.ts`: interfaz `Store` completa según SPEC §4 (`createTask`, `updateTask`,
+    `createActionRun` y `updateActionRun` ampliados; `materializeOccurrence`,
+    `relaunchOccurrence`, `listTenants`, filtros de `listRootTasks`, CRUD nuevo y pedidos internos);
   - `shared/src/index.ts`: los campos que pasan a requeridos;
   - `server/test/store-model.test.ts` (nuevo);
-  - adaptación sin cambiar aserciones de `server/test/engine.test.ts`,
-    `server/test/llm-mock.test.ts` y `server/test/connectors.test.ts` (SPEC §9).
+  - adaptación sin cambiar aserciones de `server/test/engine.test.ts` (incluido el doble
+    `createMemoryStore` con los métodos nuevos), `server/test/llm-mock.test.ts` y
+    `server/test/connectors.test.ts` (SPEC §9).
 - Implementa SPEC §4:
   - tablas y columnas;
   - migración idempotente;
@@ -111,7 +112,8 @@ Ola 7: M-10
   - `server/test/policies.test.ts` (nuevo).
 - Implementa SPEC §5.3 y D-M17. La parte de "árbol no confiable" se prueba con una raíz marcada a
   mano.
-- Pruebas: criterio 7 completo, más:
+- Pruebas: criterio 7 sobre el motor y la función de validación (el 400 HTTP de "`gt` sobre texto"
+  se prueba en M-08, cuando existan las rutas de políticas), más:
   - parámetro ausente → aplica (con una acción de prueba de parámetro opcional);
   - `untrustedInput` + `external` → aplica con `approvalSource = 'untrusted_input'`.
 
@@ -137,8 +139,9 @@ Ola 7: M-10
   - `server/src/llm/anthropic.ts` y `server/src/llm/mock.ts`: solo aceptar las entradas nuevas
     (el formato lo da M-09);
   - `server/test/engine-scheduled.test.ts` (nuevo).
-- Implementa SPEC §5.2, la recuperación de §5.1, D-M19 (`allowDelegation`) y D-M20 (extracción de
-  marcadores). El `context` llega al LLM como entrada separada: M-05 pasa el campo y M-09 le da
+- Implementa SPEC §5.2, la recuperación de §5.1 dentro de `Engine.recover` (todos los tenants), D-M19
+  (`allowDelegation`), D-M20 (extracción, entrega única y consumo de pedidos internos) y la marca
+  de raíces `inbound`. El `context` llega al LLM como entrada separada: M-05 pasa el campo y M-09 le da
   formato.
 - Pruebas: criterios 5 y 6, con el LLM simulado contando las llamadas de planificación y síntesis.
   Incluye el caso con aprobación y reinicio, y el de reinicio después de crear la hija pasante.
@@ -148,7 +151,7 @@ Ola 7: M-10
   `server/src/contracts.ts` (campos nuevos **opcionales**, para no romper los literales de
   `engine.test.ts` y `llm-mock.test.ts`), `server/src/index.ts` (composition root) y
   `server/test/scheduler.test.ts` (nuevo).
-- Implementa SPEC §5.1 y D-M18:
+- Implementa SPEC §5.1 (salvo la recuperación, que es de M-05) y D-M18:
   - reloj inyectable;
   - un ciclo al arrancar;
   - tope de 2 h;
@@ -167,7 +170,9 @@ Ola 7: M-10
     varias instancias.
 - Implementa SPEC §5.5 y la entrega al LLM de §5.2.
 - Pruebas: criterio 9, más:
-  - una etiqueta de cierre dentro del contexto queda neutralizada;
+  - una etiqueta de cierre (`</datos_no_confiables>` o `</pedidos_internos>`) dentro del contexto
+    queda neutralizada;
+  - en una raíz `inbound`, la hija y la síntesis reciben el texto entrante envuelto;
   - las pruebas doradas de M-07 siguen verdes.
 
 ### M-08 · API REST y agenda

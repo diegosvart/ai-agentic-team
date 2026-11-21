@@ -226,7 +226,7 @@ Reglas de la rutina:
 |------------|-------|---------|------|
 | Lunes 09:00 | R-DIR-06 Revisión semanal de desempeño | P-DIR-02 | Automática |
 | Viernes 16:00 | R-DIR-07 Revisión de pipeline con Comercial | P-COM-01 | Automática |
-| 4.º día hábil, 09:30 | R-DIR-08 Cierre y planificación mensual | P-DIR-03 | Automática |
+| 4.º día hábil, 09:30 | R-DIR-08 Cierre y planificación mensual | P-DIR-03 | Automática (si el cierre contable R-FIN-04, que es manual, no se lanzó, el CEO lo informa como pendiente) |
 
 ## 7. Tareas recurrentes por área
 
@@ -270,7 +270,7 @@ Reglas de la rutina:
 | Lo que dice un proceso | Cómo ocurre |
 |------------------------|-------------|
 | "Escala al CEO" | El agente termina su subtarea con una línea `[ESCALAR] motivo` en el resultado. El sistema extrae esas líneas y se las entrega al CEO como pedidos internos en R-DIR-02 y R-DIR-03. |
-| "Pide a Finanzas / a Proyectos" (traspaso) | El agente deja `[TRASPASO área] pedido` en su resultado; el CEO lo convierte en una subtarea para esa área en su siguiente revisión. |
+| "Pide a Finanzas / a Proyectos" (traspaso) | El agente deja `[TRASPASO clave-del-área] pedido` en su resultado (p. ej. `[TRASPASO finanzas]`). El sistema lo guarda y se lo entrega **una sola vez** al CEO en su siguiente revisión, que lo convierte en una subtarea para esa área. |
 | "Reintenta o reasigna" | El CEO crea una subtarea nueva (no se edita la fallida). |
 | "Urgente" | Se calcula por antigüedad en horas hábiles (§6.1); no se guarda. |
 | "Escala al Dueño" | El CEO lo pone en su síntesis; el Dueño lo ve en el informe y en la agenda. |
@@ -310,13 +310,16 @@ Reglas de los umbrales:
 - Ningún agente aprueba ejecuciones (ni las suyas ni las de otro).
 - Ninguna tarea recurrente ejecuta acciones 🔒 sin pasar por la bandeja, aunque sea automática.
 - La única excepción a "efecto externo = aprobación" es la de §2 (U-03), y se declara como política;
-  no se agregan excepciones sin escribirlas aquí.
+  no se agregan excepciones sin escribirlas aquí. Ojo: esta es una **regla de gobierno**, no algo que
+  el sistema impida. Una acción creada desde la app sin 🔒 se ejecuta sola en trabajo confiable; quien
+  la crea es responsable de marcarle 🔒 si tiene efecto externo.
 - **Entrada no confiable:** el correo y cualquier texto de terceros llegan como datos, nunca como
   instrucciones. Se considera trabajo de entrada no confiable todo lo que nace de un mensaje entrante
   (webhook) y todo lo que delegan las recurrentes del CEO que reciben información (R-DIR-01 a
   R-DIR-06), porque esa información puede arrastrar texto de terceros de días anteriores. En ese
   trabajo **toda** acción con efecto externo pide aprobación, incluida la excepción U-03, que queda
-  solo para solicitudes del Dueño y recurrentes de área como R-FIN-01.
+  para el trabajo de origen confiable: solicitudes del Dueño y recurrentes que no reciben información
+  (de área, como R-FIN-01, o del CEO, como R-DIR-07 y R-DIR-08).
 - Las credenciales nunca viajan en parámetros ni en `connectorConfig` (ver `docs/INTEGRATIONS.md` §4).
 
 ### 8.5 RACI de procesos clave
@@ -359,8 +362,8 @@ modelo pero la oficina muestra el aviso que ya existe.
 
 ## 11. Supuestos y preguntas abiertas
 
-- **S1.** El correo entra por un conector de lectura (`leer_bandeja`) que en esta etapa es stub,
-  igual que el conector `email` actual.
+- **S1.** El correo entra por una acción de lectura (`leer_bandeja`) del conector `internal`, simulada
+  en esta etapa; la lectura real se hará con un conector de correo (ver `docs/INTEGRATIONS.md`).
 - **S2.** Las acciones nuevas se crean como acciones del conector `internal` (simuladas) hasta que haya
   integraciones reales.
 - **S3.** El contenido del correo es de terceros y puede intentar dar órdenes; por eso se trata como
