@@ -226,7 +226,7 @@ Reglas de la rutina:
 |------------|-------|---------|------|
 | Lunes 09:00 | R-DIR-06 Revisión semanal de desempeño | P-DIR-02 | Automática |
 | Viernes 16:00 | R-DIR-07 Revisión de pipeline con Comercial | P-COM-01 | Automática |
-| 4.º día hábil, 09:30 | R-DIR-08 Cierre y planificación mensual | P-DIR-03 | Automática (si el cierre contable R-FIN-04, que es manual, no se lanzó, el CEO lo informa como pendiente) |
+| 4.º día hábil, 09:30 | R-DIR-08 Cierre y planificación mensual | P-DIR-03 | Automática. Usa el cierre de Finanzas si ya existe; si R-FIN-04 (manual) no se lanzó, el Dueño lo ve en la agenda como pendiente y el informe del mes queda preliminar. |
 
 ## 7. Tareas recurrentes por área
 
@@ -270,7 +270,7 @@ Reglas de la rutina:
 | Lo que dice un proceso | Cómo ocurre |
 |------------------------|-------------|
 | "Escala al CEO" | El agente termina su subtarea con una línea `[ESCALAR] motivo` en el resultado. El sistema extrae esas líneas y se las entrega al CEO como pedidos internos en R-DIR-02 y R-DIR-03. |
-| "Pide a Finanzas / a Proyectos" (traspaso) | El agente deja `[TRASPASO clave-del-área] pedido` en su resultado (p. ej. `[TRASPASO finanzas]`). El sistema lo guarda y se lo entrega **una sola vez** al CEO en su siguiente revisión, que lo convierte en una subtarea para esa área. |
+| "Pide a Finanzas / a Proyectos" (traspaso) | El agente deja `[TRASPASO clave-del-área] pedido` en su resultado (p. ej. `[TRASPASO finanzas]`). El sistema lo guarda y se lo entrega **una sola vez** al CEO en su siguiente revisión que puede delegar (R-DIR-02, R-DIR-03a/b o R-DIR-06), que lo convierte en una subtarea para esa área. R-DIR-05, que no delega, no los consume. |
 | "Reintenta o reasigna" | El CEO crea una subtarea nueva (no se edita la fallida). |
 | "Urgente" | Se calcula por antigüedad en horas hábiles (§6.1); no se guarda. |
 | "Escala al Dueño" | El CEO lo pone en su síntesis; el Dueño lo ve en el informe y en la agenda. |

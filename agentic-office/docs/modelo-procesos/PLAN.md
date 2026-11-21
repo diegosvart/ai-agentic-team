@@ -1,6 +1,6 @@
 # PLAN — Modelo de procesos (M-00…M-10)
 
-Implementa [SPEC.md](SPEC.md) (revisión 3). Método igual al de `plan-oficina-v2` (ver su LOOP.md §6):
+Implementa [SPEC.md](SPEC.md) (revisión 4). Método igual al de `plan-oficina-v2` (ver su LOOP.md §6):
 
 - **Orquestador:** Opus. Integra con `merge --no-ff` en la rama de integración y no hace push sin
   permiso del usuario.
@@ -20,9 +20,9 @@ Implementa [SPEC.md](SPEC.md) (revisión 3). Método igual al de `plan-oficina-v
 
 | Id | Entregable | Estado |
 |----|------------|--------|
-| E-01 | PROCESOS.md | Revisión 3 (ciclos: 70, 76 y 83). El usuario pidió el tercer ciclo; el cuarto lo decide el usuario |
-| E-02 | SPEC.md | Revisión 3 (cambios en SPEC §12) |
-| E-03 | PLAN.md (este archivo) | Revisión 3 |
+| E-01 | PROCESOS.md | Revisión 4 (ciclos: 70, 76, 83 y 83). Pendiente de decisión del usuario |
+| E-02 | SPEC.md | Revisión 4 (cambios en SPEC §12) |
+| E-03 | PLAN.md (este archivo) | Revisión 4 |
 
 Las preguntas abiertas Q1–Q3 de PROCESOS.md se cierran con el usuario antes de la Ola 1.
 
@@ -58,7 +58,8 @@ Ola 7: M-10
 
 ### M-01 · Contrato compartido
 - Archivos: `shared/src/index.ts`.
-- Tipos de SPEC §3. Los campos nuevos de tipos existentes van **opcionales**.
+- Tipos de SPEC §3. Los campos nuevos de tipos existentes van **opcionales**, y `AgentInput.area`
+  sigue requerido (pasa a opcional en M-08).
 - Agrega las constantes de patrones.
 - Criterio: el web y el servidor compilan **sin cambios** en su código.
 
@@ -69,6 +70,8 @@ Ola 7: M-10
     `createActionRun` y `updateActionRun` ampliados; `materializeOccurrence`,
     `relaunchOccurrence`, `listTenants`, filtros de `listRootTasks`, CRUD nuevo y pedidos internos);
   - `shared/src/index.ts`: los campos que pasan a requeridos;
+  - `server/test/api.test.ts`: solo el literal del CEO que deja de compilar al volver requerido
+    `Agent.areaId` (el resto del doble se adapta en M-08);
   - `server/test/store-model.test.ts` (nuevo);
   - adaptación sin cambiar aserciones de `server/test/engine.test.ts` (incluido el doble
     `createMemoryStore` con los métodos nuevos), `server/test/llm-mock.test.ts` y
@@ -133,13 +136,14 @@ Ola 7: M-10
 - Archivos:
   - `server/src/engine/index.ts`: `materializeScheduled`, `startScheduled`, `synthesis` respetado
     en `refreshRoot`, la síntesis y la recuperación, y `origin` en `submitRequest`;
-  - `server/src/contracts.ts`: interfaz `Engine` y entradas opcionales de `LLMProvider` (`plan`
-    con `structure`, `context` e `internalRequests`; `startConversation` y `step` con
-    `areaProcesses`; `PlannedSubtask.processKey`);
+  - `server/src/contracts.ts`: interfaz `Engine` (`startScheduled(tenantId, rootId)`, opción
+    `schedulerActive` en `createEngine`) y entradas opcionales de `LLMProvider` según SPEC §5.5
+    (`plan`, `startConversation`, `step` y `synthesize`; `PlannedSubtask.processKey`);
   - `server/src/llm/anthropic.ts` y `server/src/llm/mock.ts`: solo aceptar las entradas nuevas
     (el formato lo da M-09);
   - `server/test/engine-scheduled.test.ts` (nuevo).
-- Implementa SPEC §5.2, la recuperación de §5.1 dentro de `Engine.recover` (todos los tenants), D-M19
+- Implementa SPEC §5.2, la recuperación de §5.1 dentro de `Engine.recover(tenantId)` (el bucle por
+  tenants va en el composition root, en M-06), el paso de `areaProcesses`, D-M19
   (`allowDelegation`), D-M20 (extracción, entrega única y consumo de pedidos internos) y la marca
   de raíces `inbound`. El `context` llega al LLM como entrada separada: M-05 pasa el campo y M-09 le da
   formato.
@@ -151,7 +155,8 @@ Ola 7: M-10
   `server/src/contracts.ts` (campos nuevos **opcionales**, para no romper los literales de
   `engine.test.ts` y `llm-mock.test.ts`), `server/src/index.ts` (composition root) y
   `server/test/scheduler.test.ts` (nuevo).
-- Implementa SPEC §5.1 (salvo la recuperación, que es de M-05) y D-M18:
+- Implementa SPEC §5.1 (salvo la recuperación, que es de M-05) y D-M18, con el orden de arranque
+  de §5.1 y el predicado `schedulerActive` conectado a la configuración:
   - reloj inyectable;
   - un ciclo al arrancar;
   - tope de 2 h;
@@ -164,7 +169,8 @@ Ola 7: M-10
     `processKey` en el esquema del plan y los bloques `<datos_no_confiables>` y
     `<pedidos_internos>`;
   - `server/src/llm/mock.ts`: devuelve `processKey`;
-  - `server/src/engine/index.ts`: solo para pasar `structure` al LLM;
+  - `server/src/engine/index.ts`: solo para pasar `structure` al LLM (`areaProcesses` ya lo pasa
+    M-05);
   - `server/test/prompt-structure.test.ts` (nuevo);
   - `docs/INTEGRATIONS.md`: §3 con `origin: 'inbound'` y `leer_bandeja`; §5 con el programador en
     varias instancias.
