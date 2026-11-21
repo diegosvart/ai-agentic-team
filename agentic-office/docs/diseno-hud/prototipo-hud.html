@@ -7,7 +7,7 @@
 <style>
 /* ===== Tokens ===== */
 :root{
-  --bg0:#030b1a; --panel:rgba(5,20,46,.78); --panel-2:rgba(11,36,72,.95); --solid:#061834;
+  --bg0:#030b1a; --panel:rgba(5,20,46,.50); --plate:rgba(5,20,46,.92); --panel-2:rgba(11,36,72,.95); --solid:#061834;
   --line:#2fd4f5; --line-dim:rgba(47,212,245,.40);
   --text:#e8f7ff; --dim:#a8c8dd; --accent:#35e0ff; --on-accent:#03121f; --focus:#ffffff;
   --ok:#5be3a4; --warn:#ffcf5c; --bad:#ff8f9c; --info:#8cc0ff;
@@ -41,6 +41,10 @@ body.hud-open .demo-bar{visibility:hidden}
 .ceo-btn .tip{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:8px;white-space:nowrap;background:#03121f;border:1px solid var(--line);padding:4px 10px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .15s}
 .ceo-btn:hover .tip,.ceo-btn:focus-visible .tip{opacity:1}
 @keyframes pulse{0%{opacity:.8;transform:translateX(-50%) scale(.6)}100%{opacity:0;transform:translateX(-50%) scale(1.15)}}
+.agent-btn{position:absolute;width:6.5%;height:12%;transform:translate(-50%,-62%);background:transparent;border:0;padding:0;cursor:pointer;border-radius:6px}
+.agent-btn:hover,.agent-btn:focus-visible{background:rgba(53,224,255,.16)}
+.agent-btn .tip{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:4px;white-space:nowrap;background:#03121f;border:1px solid var(--line);padding:2px 8px;font-size:12px;opacity:0;pointer-events:none}
+.agent-btn:hover .tip,.agent-btn:focus-visible .tip{opacity:1}
 .demo-bar{position:fixed;left:12px;top:12px;z-index:5;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:rgba(3,14,32,.94);border:1px solid var(--line-dim);padding:8px 12px;font-size:13px;max-width:calc(100vw - 24px)}
 .demo-bar strong{font-family:var(--mono);letter-spacing:.08em;color:var(--accent)}
 .demo-bar label{display:flex;gap:8px;align-items:center;cursor:pointer}
@@ -63,8 +67,9 @@ body.hud-open .demo-bar{visibility:hidden}
 .center{grid-column:2;grid-row:3;display:flex;flex-direction:column;min-height:0}
 .reqbar{grid-column:2;grid-row:4}
 .side{grid-column:3;grid-row:2/5;display:flex;flex-direction:column;gap:14px;min-height:0;overflow:auto}
-.hud-frame{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);pointer-events:none}
-.hud-frame path,.rule path{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:3000;stroke-dashoffset:0;vector-effect:non-scaling-stroke}
+.corner{position:absolute;width:36px;height:36px;pointer-events:none}
+.corner.c1{left:6px;top:6px}.corner.c2{right:6px;top:6px;transform:scaleX(-1)}.corner.c3{right:6px;bottom:6px;transform:scale(-1,-1)}.corner.c4{left:6px;bottom:6px;transform:scaleY(-1)}
+.corner path,.rule path{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:1;stroke-dashoffset:0}
 
 /* Panel con esquinas recortadas y línea fina */
 .panel,.card,.btn{position:relative;isolation:isolate;clip-path:var(--shape)}
@@ -79,6 +84,9 @@ body.hud-open .demo-bar{visibility:hidden}
 
 /* Barra superior */
 .topbar{display:flex;align-items:center;gap:16px;padding:10px 18px;min-height:58px}
+.topbar h2,.topbar .meta,.sim,.conn{background:var(--plate);padding:3px 10px}
+.conn{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--ok);color:var(--ok);font:700 12px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.conn i{width:8px;height:8px;border-radius:50%;background:var(--ok)}
 .topbar h2{font-size:17px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
 .topbar h2:focus{outline:none}
 .topbar .meta{color:var(--dim);font-size:13px}
@@ -105,8 +113,8 @@ body.hud-open .demo-bar{visibility:hidden}
 
 /* Riel hexagonal */
 .rail{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 6px}
-.rail-title{font:700 11px var(--mono);letter-spacing:.2em;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
-.tab{position:relative;display:grid;justify-items:center;gap:5px;width:100%;padding:6px 2px;background:none;border:0;color:var(--dim);font-weight:600;font-size:12px;cursor:pointer;text-align:center}
+.rail-title{background:var(--plate);padding:2px 8px;font:700 11px var(--mono);letter-spacing:.2em;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
+.tab{position:relative;display:grid;justify-items:center;gap:5px;width:100%;padding:6px 2px;background:var(--plate);border-radius:3px;border:0;color:var(--dim);font-weight:600;font-size:12px;cursor:pointer;text-align:center}
 .tab:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
 .hex{position:relative;isolation:isolate;display:grid;place-items:center;width:52px;height:58px;background:var(--line);clip-path:var(--hex);font:700 16px var(--mono);color:var(--accent);transition:background .15s}
 .hex::before{content:"";position:absolute;inset:1.5px;z-index:-1;background:var(--solid);clip-path:var(--hex);transition:background .15s}
@@ -118,6 +126,14 @@ body.hud-open .demo-bar{visibility:hidden}
 
 /* Módulos */
 .tabpanel{flex:1;min-height:0;overflow:auto;padding:20px 22px;scrollbar-color:var(--line) transparent}
+.tabpanel>.mod-head,.tabpanel>h4,.tabpanel>p,.tabpanel>.legend,.tabpanel>.small,.tabpanel>ul.hist,.tabpanel>.empty,.tabpanel>.cfg{background:var(--plate);padding:8px 12px}
+.tabpanel>.progress{background:var(--plate)}
+.tabpanel>.back{margin-bottom:12px}
+.res{flex-basis:100%;background:#041126;border:1px solid var(--line-dim);padding:10px 12px;font-size:13px;white-space:pre-line}
+.res b{color:var(--accent)}
+.nd{color:var(--info)}
+.pedido{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline;padding:10px 14px}
+.cfg{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 .tabpanel:focus-visible{outline:2px solid var(--focus);outline-offset:-4px}
 .mod-head{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:16px}
 .mod-head .num{font:700 30px/1 var(--mono);color:var(--accent)}
@@ -166,7 +182,7 @@ body.hud-open .demo-bar{visibility:hidden}
 .tree li{margin:6px 0}
 .node{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 12px;background:rgba(10,34,70,.9);border:1px solid var(--line-dim)}
 .node .ttl{flex:1;min-width:160px}
-.toggle{width:30px;height:30px;display:grid;place-items:center;background:none;border:1px solid var(--line-dim);color:var(--accent);cursor:pointer;font-weight:700}
+.toggle{width:36px;height:36px;display:grid;place-items:center;background:none;border:1px solid var(--line-dim);color:var(--accent);cursor:pointer;font-weight:700}
 .toggle:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 
@@ -191,9 +207,10 @@ textarea:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
 
 /* Gauges */
 .side .panel{padding:14px 16px}
-.side h3{font:700 12px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.side h3{display:inline-block;background:var(--plate);padding:2px 8px;font:700 12px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
 .gauges{display:grid;gap:12px}
-.gauges li{display:flex;gap:14px;align-items:center}
+.gauges li{display:flex;gap:14px;align-items:center;background:var(--plate);padding:8px 10px;border-radius:3px}
+.spark-panel p{background:var(--plate);padding:4px 8px}
 .gauge{position:relative;width:76px;height:76px;flex:none}
 .gauge svg{width:100%;height:100%;transform:rotate(-90deg)}
 .gauge .trk{fill:none;stroke:rgba(47,212,245,.22);stroke-width:6}
@@ -206,31 +223,32 @@ textarea:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
 /* Barra de solicitud */
 .reqbar{padding:10px 14px}
 .reqbar{display:flex;gap:12px;align-items:flex-end}
+.reqbar>div{background:var(--plate);padding:6px 8px;border-radius:3px}
 .reqbar textarea{height:44px;min-height:44px;resize:none}
-.reqbar label{display:block;font:700 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.reqbar label{display:block;padding:0 0 2px;font:700 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
 
 /* Animaciones de ensamblado */
 .hud[data-state="opening"] .panel{animation:panelIn .6s var(--ease) both;animation-delay:calc(var(--i)*80ms)}
-.hud[data-state="opening"] .hud-frame path,.hud[data-state="opening"] .rule path{animation:draw .9s var(--ease) both;animation-delay:.25s}
+.hud[data-state="opening"] .corner path,.hud[data-state="opening"] .rule path{animation:draw .9s var(--ease) both;animation-delay:.25s}
 .hud[data-state="opening"]{animation:veil .5s ease both}
 .hud[data-state="closing"] .panel{animation:panelOut .28s ease-in both;animation-delay:calc((4 - var(--i))*40ms)}
 .hud[data-state="closing"]{animation:veil .46s ease reverse both}
 @keyframes panelIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
 @keyframes panelOut{to{opacity:0;transform:translateY(10px) scale(.98)}}
-@keyframes draw{from{stroke-dashoffset:3000}to{stroke-dashoffset:0}}
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
 @keyframes veil{from{background-color:transparent;opacity:.0}to{opacity:1}}
 
 /* Movimiento reducido: sin dolly, sin dibujo de líneas, sin pulsos; fundido <=150 ms */
 html.rm .scene-wrap{transition:none}
 html.rm .ceo-btn .pulse,html.rm .sim i{animation:none}
-html.rm .hud .panel,html.rm .hud .hud-frame path,html.rm .hud .rule path{animation:none!important}
+html.rm .hud .panel,html.rm .hud .corner path,html.rm .hud .rule path{animation:none!important}
 html.rm .hud[data-state]{animation:rmfade .12s linear both!important}
 html.rm .gauge .arc,html.rm .progress i{transition:none}
 @keyframes rmfade{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){
   .scene-wrap{transition:none}
   .ceo-btn .pulse,.sim i{animation:none}
-  .hud .panel,.hud .hud-frame path,.hud .rule path{animation:none!important}
+  .hud .panel,.hud .corner path,.hud .rule path{animation:none!important}
   .hud[data-state]{animation:rmfade .12s linear both!important}
   .gauge .arc,.progress i{transition:none}
 }
@@ -239,37 +257,42 @@ html.rm .gauge .arc,html.rm .progress i{transition:none}
 @media (max-width:860px){
   .hud{display:flex;flex-direction:column;gap:10px;padding:8px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
   .hud>*{flex-shrink:0}
-  .window{display:none}
+  .window{display:block;order:1;flex:none;min-height:15vh}
+  .hud{scroll-padding-top:var(--bt,120px);scroll-padding-bottom:var(--br,96px)}
+  .toggle{width:44px;height:44px}
   .topbar{order:0;flex-wrap:wrap;gap:8px;padding:8px 12px;min-height:0;position:sticky;top:0;z-index:3}
   .topbar .meta{display:none}
   .topbar h2{font-size:14px}
-  .side{order:1;overflow:visible;flex:none}
-  .center{order:2;flex:none}
+  .side{order:2;overflow:visible;flex:none}
+  .center{order:3;flex:none}
   .tabpanel{overflow:visible;padding:14px 12px}
-  .reqbar{order:3}
-  .rail{order:4;flex-direction:row;justify-content:space-around;gap:0;padding:6px 2px;position:sticky;bottom:0;z-index:3}
+  .reqbar{order:4}
+  .rail{order:5;flex-direction:row;justify-content:space-around;gap:0;padding:6px 2px;position:sticky;bottom:0;z-index:3}
   .rail-title{display:none}
   .tab{width:auto;flex:1;min-width:0;padding:4px 0}
   .hex{width:40px;height:45px;font-size:14px}
   .cnt{right:50%;margin-right:-26px}
-  .gauges{grid-template-columns:1fr 1fr}
-  .gauges li{gap:8px}
-  .gauge{width:52px;height:52px}
-  .gauge .val{font-size:15px}
-  .g-lab{font-size:13px;line-height:1.2}.g-sub{font-size:12px}
+  .gauges{grid-template-columns:repeat(4,1fr);gap:6px}
+  .gauges li{flex-direction:column;text-align:center;gap:4px;padding:6px 2px}
+  .gauge{width:44px;height:44px}
+  .gauge .val{font-size:14px}
+  .g-lab{font-size:11px;line-height:1.15;letter-spacing:-.01em}.g-sub{font-size:11px;line-height:1.15;overflow-wrap:anywhere}
+  .topbar h2{font-size:13px;letter-spacing:.06em}
+  .topbar .conn,.topbar .sim{padding:2px 6px;font-size:11px;letter-spacing:.06em}
+  .topbar .close-btn{min-height:40px;padding:6px 12px}
   .side .panel{padding:10px 12px}
   .spark-panel{display:none}
   .reqbar{flex-direction:column;align-items:stretch}
   .btn{min-height:44px}
   .chip{min-height:40px}
   .demo-bar{font-size:12px}
-  body.dolly .scene-wrap{transform:scale(.72) translateY(-3%)}
+  body.dolly .scene-wrap{transform:translateY(-17%) scale(.62)}
 }
 @media (max-width:360px){
   .tab{font-size:11px}
   .hex{width:34px;height:38px;font-size:12px}
   .cnt{margin-right:-20px}
-  .gauges{grid-template-columns:1fr}
+  .gauges{grid-template-columns:1fr 1fr}
   .topbar h2{font-size:13px;letter-spacing:.06em}
   .tabpanel{padding:12px 8px}
   .btn{padding:8px 12px}
@@ -288,7 +311,7 @@ html.rm .gauge .arc,html.rm .progress i{transition:none}
   .btn-primary{background:ButtonFace;color:ButtonText;border:2px solid Highlight}
   .gauge .trk{stroke:GrayText}.gauge .arc{stroke:Highlight}.gauge .ticks{stroke:CanvasText}
   .progress{background:Canvas;border:1px solid CanvasText;clip-path:none}.progress i{background:Highlight}
-  .hud-frame path,.rule path{stroke:CanvasText}
+  .corner path,.rule path{stroke:CanvasText}
   .spark polyline{stroke:CanvasText}.spark path{fill:none}
   .badge,.sim{border:1px solid CanvasText;color:CanvasText}
   .cnt{background:Highlight;color:HighlightText;forced-color-adjust:none}
@@ -326,15 +349,17 @@ html.rm .gauge .arc,html.rm .progress i{transition:none}
 <div id="livePage" class="sr-only" role="status" aria-live="polite"></div>
 
 <div id="hud" class="hud" role="dialog" aria-modal="true" aria-labelledby="hud-title" hidden data-state="closed">
-  <svg class="hud-frame" aria-hidden="true" focusable="false" preserveAspectRatio="none" viewBox="0 0 100 100">
-    <path pathLength="1" d="M0 6 V0 H6"/><path pathLength="1" d="M94 0 H100 V6"/><path pathLength="1" d="M100 94 V100 H94"/><path pathLength="1" d="M6 100 H0 V94"/>
-  </svg>
+  <svg class="corner c1" aria-hidden="true" focusable="false" viewBox="0 0 36 36"><path pathLength="1" d="M0 36 V0 H36"/></svg>
+  <svg class="corner c2" aria-hidden="true" focusable="false" viewBox="0 0 36 36"><path pathLength="1" d="M0 36 V0 H36"/></svg>
+  <svg class="corner c3" aria-hidden="true" focusable="false" viewBox="0 0 36 36"><path pathLength="1" d="M0 36 V0 H36"/></svg>
+  <svg class="corner c4" aria-hidden="true" focusable="false" viewBox="0 0 36 36"><path pathLength="1" d="M0 36 V0 H36"/></svg>
 
   <header class="panel topbar" style="--i:0">
     <h2 id="hud-title" tabindex="-1">Centro de mando · Aster Consultores</h2>
     <span class="meta" id="hudDate"></span>
     <span class="spacer"></span>
-    <span class="sim"><i aria-hidden="true"></i>Simulación</span>
+    <span class="conn" id="conn" role="status"><i aria-hidden="true"></i>En vivo</span>
+    <span class="sim" title="Opus: mock · Sonnet: mock"><i aria-hidden="true"></i>Simulación<span class="sr-only"> (modelos: Opus mock, Sonnet mock)</span></span>
     <button type="button" class="btn close-btn" id="closeBtn" aria-label="Cerrar centro de mando">Cerrar <span aria-hidden="true">✕</span></button>
     <svg class="rule" aria-hidden="true" focusable="false" preserveAspectRatio="none" viewBox="0 0 100 2"><path pathLength="1" d="M0 1 H100"/></svg>
   </header>
@@ -419,7 +444,7 @@ var areaAgents=function(k){return AGENTS.filter(function(a){return a.area===k&&a
 var PROC=[
  ['P-DIR-01','Gestión diaria de la dirección','estrategico','direccion','ceo','Cada día hábil'],
  ['P-DIR-02','Revisión semanal de desempeño','estrategico','direccion','ceo','Lunes 09:00'],
- ['P-DIR-03','Cierre y planificación mensual','estrategico','direccion','ceo','1.er día hábil, 09:30'],
+ ['P-DIR-03','Cierre y planificación mensual','estrategico','direccion','ceo','4.º día hábil, 09:30'],
  ['P-COM-01','Gestión de oportunidades','operativo','comercial','ventas','Lead nuevo'],
  ['P-COM-02','Propuesta y contrato','operativo','comercial','ventas','Oportunidad en etapa «propuesta»'],
  ['P-MKT-01','Generación de demanda','operativo','marketing','marketing','Plan de contenidos mensual'],
@@ -444,13 +469,13 @@ var REC=[
  ['R-DIR-02','Resolver pendientes del día','P-DIR-01','ceo','auto',D,'09:00'],
  ['R-DIR-03a','Revisar tareas de los agentes','P-DIR-01','ceo','auto',D,'12:30'],
  ['R-DIR-03b','Revisar tareas de los agentes','P-DIR-01','ceo','auto',D,'17:00'],
- ['R-DIR-04a','Preparar aprobaciones','P-DIR-01','ceo','auto',D,'10:00'],
- ['R-DIR-04b','Preparar aprobaciones','P-DIR-01','ceo','auto',D,'15:00'],
- ['R-DIR-04c','Preparar aprobaciones','P-DIR-01','ceo','auto',D,'17:30'],
- ['R-DIR-05','Informe de cierre del día','P-DIR-01','ceo','auto',D,'17:45'],
+ ['R-DIR-04a','Preparar aprobaciones','P-DIR-01','ceo','auto',D,'10:00',1],
+ ['R-DIR-04b','Preparar aprobaciones','P-DIR-01','ceo','auto',D,'15:00',1],
+ ['R-DIR-04c','Preparar aprobaciones','P-DIR-01','ceo','auto',D,'17:30',1],
+ ['R-DIR-05','Informe de cierre del día','P-DIR-01','ceo','auto',D,'17:45',1],
  ['R-DIR-06','Revisión semanal de desempeño','P-DIR-02','ceo','auto',W('lunes'),'09:00'],
  ['R-DIR-07','Revisión de pipeline con Comercial','P-COM-01','ceo','auto',W('viernes'),'16:00'],
- ['R-DIR-08','Cierre y planificación mensual','P-DIR-03','ceo','auto',M('1.er día hábil'),'09:30'],
+ ['R-DIR-08','Cierre y planificación mensual','P-DIR-03','ceo','auto',M('4.º día hábil'),'09:30'],
  ['R-COM-01','Seguimiento de oportunidades sin contacto en 5 días','P-COM-01','ventas','auto',D,'09:30'],
  ['R-COM-02','Actualizar etapa del pipeline','P-COM-01','ventas','auto',W('viernes'),'15:00'],
  ['R-MKT-01','Métricas de campañas y leads entregados','P-MKT-01','marketing','auto',W('lunes'),'10:00'],
@@ -474,9 +499,12 @@ var TASKS=[
  {id:'r1a',p:'r1',a:'proyectos',t:'Validar el hito 3 con el equipo',s:'completed'},
  {id:'r1b',p:'r1',a:'contabilidad',t:'Emitir la factura del hito 3',s:'waiting_approval'},
  {id:'r1c',p:'r1',a:'soporte',t:'Informar al cliente la fecha de la factura',s:'queued'},
- {id:'r2',p:null,a:'ceo',t:'R-DIR-01 · Leer y triar correo',s:'running',o:'recurring',u:1},
+ {id:'r2',p:null,a:'ceo',t:'R-DIR-01 · Leer y triar correo (lun 23)',s:'waiting_approval',o:'recurring',u:1},
  {id:'r2a',p:'r2',a:'ventas',t:'Responder consulta sobre la propuesta de Tinta Norte',s:'completed'},
  {id:'r2b',p:'r2',a:'contabilidad',t:'Recordar el cobro pendiente a Alerce S.A.',s:'waiting_approval'},
+ {id:'r7',p:null,a:'ceo',t:'R-DIR-01 · Leer y triar correo (hoy)',s:'waiting_approval',o:'recurring',u:1},
+ {id:'r7a',p:'r7',a:'ventas',t:'Agendar reunión comercial con Alerce S.A.',s:'waiting_approval'},
+ {id:'r7b',p:'r7',a:'soporte',t:'Responder consulta de Nubia Ltda.',s:'completed'},
  {id:'r3',p:null,a:'ceo',t:'Incorporar a Valentina Soto (ingreso 1 dic)',s:'running',o:'request'},
  {id:'r3a',p:'r3',a:'rrhh',t:'Preparar contrato y ficha de ingreso',s:'running'},
  {id:'r3b',p:'r3',a:'operaciones',t:'Crear cuenta de correo y accesos',s:'waiting_approval'},
@@ -492,10 +520,11 @@ var TASKS=[
 ];
 /* Ejecuciones. as: approvalSource; pol: policyId; rn: requireNote; urg/hw: urgencia (businessHoursWaiting) */
 var RUNS=[
- {id:'x1',tk:'r1b',a:'contabilidad',n:'Emitir factura',pr:{Cliente:'Nubia Ltda.',Importe:'$18.400.000',Moneda:'CLP'},s:'pending_approval',as:'action',pol:'U-02',rn:true,urg:false,hw:3,note:'',at:'11:05'},
- {id:'x2',tk:'r4a',a:'contabilidad',n:'Enviar recordatorio de cobro',pr:{Cliente:'Tinta Norte',Factura:'F-2041',Adeudado:'$24.500.000',Mora:'38 días'},s:'pending_approval',as:'policy',pol:'U-03',rn:false,urg:false,hw:2,note:'',at:'11:40'},
- {id:'x3',tk:'r3b',a:'operaciones',n:'Gestionar acceso',pr:{Persona:'Valentina Soto',Sistema:'Correo',Operación:'alta'},s:'pending_approval',as:'action',pol:'',rn:false,urg:false,hw:4,note:'',at:'10:50'},
- {id:'x4',tk:'r2b',a:'contabilidad',n:'Enviar recordatorio de cobro',pr:{Cliente:'Alerce S.A.',Factura:'F-1988',Adeudado:'$3.200.000',Mora:'35 días'},s:'pending_approval',as:'untrusted_input',pol:'',rn:false,urg:true,hw:11,note:'',at:'08:45',src:'R-DIR-01 · correo'},
+ {id:'x1',tk:'r1b',a:'contabilidad',n:'Emitir factura',pr:{Cliente:'Nubia Ltda.',Importe:'$18.400.000',Moneda:'CLP'},s:'pending_approval',as:'action',pol:'U-02',rn:true,urg:false,hw:2.1,note:'',at:'Hoy 11:05'},
+ {id:'x2',tk:'r4a',a:'contabilidad',n:'Enviar recordatorio de cobro',pr:{Cliente:'Tinta Norte',Factura:'F-2041',Adeudado:'$24.500.000',Mora:'38 días'},s:'pending_approval',as:'policy',pol:'U-03',rn:false,urg:false,hw:1.5,note:'',at:'Hoy 11:40'},
+ {id:'x3',tk:'r3b',a:'operaciones',n:'Gestionar acceso',pr:{Persona:'Valentina Soto',Sistema:'Correo',Operación:'alta'},s:'pending_approval',as:'action',pol:'',rn:false,urg:false,hw:2.3,note:'',at:'Hoy 10:50'},
+ {id:'x4',tk:'r2b',a:'contabilidad',n:'Enviar recordatorio de cobro',pr:{Cliente:'Alerce S.A.',Factura:'F-1988',Adeudado:'$3.200.000',Mora:'35 días'},s:'pending_approval',as:'untrusted_input',pol:'',rn:false,urg:true,hw:11.2,note:'',at:'Lun 23 11:00',src:'R-DIR-01 del lunes 23 · correo'},
+ {id:'x9',tk:'r7a',a:'ventas',n:'Agendar reunión comercial',pr:{Lead:'L-327',Fecha:'2026-11-26 11:00',Asunto:'Propuesta Alerce'},s:'pending_approval',as:'action',pol:'',rn:false,urg:false,hw:3.5,note:'',at:'Hoy 09:40'},
  {id:'x5',tk:'r6a',a:'ventas',n:'Enviar propuesta',pr:{Cliente:'Tinta Norte',Importe:'$12.000.000'},s:'succeeded',note:'',at:'09:20'},
  {id:'x6',tk:'r6b',a:'ventas',n:'Agendar reunión comercial',pr:{Lead:'L-311'},s:'succeeded',note:'Aprobado sin cambios.',at:'09:45'},
  {id:'x7',tk:'r5b',a:'operaciones',n:'Emitir orden de compra',pr:{Proveedor:'Nodo Software',Importe:'$2.100.000'},s:'failed',note:'',err:'El proveedor no está registrado.',at:'09:51'},
@@ -504,25 +533,31 @@ var RUNS=[
 /* Agenda simulada: martes 24 nov 2026, 13:10 (15.º día hábil fue el vie 20). dueAt vs. hora: SPEC 5.4 */
 var NOW='13:10';
 var AGENDA=[
- {id:'R-DIR-01',t:'Leer y triar correo',h:'08:30',s:'done',m:'auto',sec:'ceo'},
- {id:'R-DIR-02',t:'Resolver pendientes del día',h:'09:00',s:'done',m:'auto',sec:'ceo'},
- {id:'R-DIR-04a',t:'Preparar aprobaciones',h:'10:00',s:'waiting_approval',m:'auto',sec:'ceo'},
- {id:'R-DIR-03a',t:'Revisar tareas de los agentes',h:'12:30',s:'running',m:'auto',sec:'ceo'},
- {id:'R-DIR-04b',t:'Preparar aprobaciones',h:'15:00',s:'scheduled',m:'auto',sec:'ceo'},
+ {id:'R-DIR-01',t:'Leer y triar correo',h:'08:30',s:'waiting_approval',m:'auto',sec:'ceo',res:'Resumen del correo: 23 mensajes leídos; 6 delegados (Comercial 2, Soporte 2, Finanzas 1, Proyectos 1); 2 requieren tu atención (Alerce S.A. y Nubia Ltda.). Queda 1 hija esperando tu aprobación: agendar la reunión comercial con Alerce S.A.'},
+ {id:'R-DIR-02',t:'Resolver pendientes del día',h:'09:00',s:'done',m:'auto',sec:'ceo',res:'Lista del día: 1) Aprobar la factura del hito 3 de Nubia Ltda. (prioridad alta). 2) Confirmar el ingreso de Valentina Soto (1 dic). 3) Revisar el cobro a Tinta Norte. Atrasadas: R-DIR-05 del lunes 23 (perdida).'},
+ {id:'R-DIR-04a',t:'Preparar aprobaciones',h:'10:00',s:'done',m:'auto',sec:'ceo',nd:1,res:'Bandeja ordenada (5 pendientes). Recomendaciones: rechazar por ahora el recordatorio a Alerce S.A. (urgente, nace de un correo); aprobar el acceso de Valentina Soto; aprobar la reunión comercial; aprobar la factura de Nubia Ltda. con nota (U-02); aprobar el cobro a Tinta Norte (U-03). No aprueba nada por su cuenta.'},
+ {id:'R-DIR-03a',t:'Revisar tareas de los agentes',h:'12:30',s:'running',m:'auto',sec:'ceo',res:'Semáforo por área (parcial, aún en curso): Finanzas ámbar (3 espera aprobación), Proyectos verde, Personas verde, Operaciones ámbar, Comercial verde.'},
+ {id:'R-DIR-04b',t:'Preparar aprobaciones',h:'15:00',s:'scheduled',m:'auto',sec:'ceo',nd:1},
  {id:'R-DIR-03b',t:'Revisar tareas de los agentes',h:'17:00',s:'scheduled',m:'auto',sec:'ceo'},
- {id:'R-DIR-04c',t:'Preparar aprobaciones',h:'17:30',s:'scheduled',m:'auto',sec:'ceo'},
- {id:'R-DIR-05',t:'Informe de cierre del día',h:'17:45',s:'scheduled',m:'auto',sec:'ceo'},
+ {id:'R-DIR-04c',t:'Preparar aprobaciones',h:'17:30',s:'scheduled',m:'auto',sec:'ceo',nd:1},
+ {id:'R-DIR-05',t:'Informe de cierre del día',h:'17:45',s:'scheduled',m:'auto',sec:'ceo',nd:1},
  {id:'R-MKT-02',t:'Plan de contenidos del mes',h:'10:00',s:'due',m:'manual',sec:'areas',who:'Lumen'},
- {id:'R-CLI-01',t:'Tickets abiertos y vencidos',h:'09:15',s:'failed',m:'auto',sec:'areas',who:'Faro'},
- {id:'R-PRY-01',t:'Control de horas vs. plan',h:'11:00',s:'done',m:'auto',sec:'areas',who:'Trama'},
- {id:'R-DIR-05@23',t:'Informe de cierre del día',code:'R-DIR-05',h:'Lun 23 nov, 17:45',s:'missed',m:'auto',sec:'late',date:'2026-11-23',who:'Orión'},
+ {id:'R-CLI-01',t:'Tickets abiertos y vencidos',h:'09:15',s:'failed',m:'auto',sec:'areas',who:'Faro',res:'Error: el sistema de tickets no respondió. La raíz quedó fallida; "Relanzar" crea una raíz nueva para la misma ocurrencia.'},
+ {id:'R-DIR-05@23',t:'Informe de cierre del día',code:'R-DIR-05',h:'Lun 23 nov, 17:45',s:'missed',m:'auto',sec:'late',date:'2026-11-23',who:'Orión',nd:1},
  {id:'R-PER-02@20',t:'Insumos de remuneraciones',code:'R-PER-02',h:'Vie 20 nov, 10:00',s:'due',m:'manual',sec:'late',date:'2026-11-20',who:'Savia'}
 ];
+/* Pedidos internos (D-M20): líneas [ESCALAR] y [TRASPASO área] de los resultados recientes */
+var PEDIDOS=[
+ ['ESCALAR','Ábaco · Finanzas','Alerce S.A. lleva 35 días de mora (F-1988) y no responde a los recordatorios. Necesita decisión del Dueño.'],
+ ['TRASPASO Comercial','Faro · Clientes y Soporte','Nubia Ltda. pide un cambio de alcance en el proyecto en curso. Se traspasa a Comercial.'],
+ ['ESCALAR','Vector · Operaciones y TI','Hay 2 accesos de salidas sin revocar desde el viernes.']
+];
+var POL=[['U-01','enviar_propuesta','importe > 30.000.000','Sí'],['U-02','emitir_factura','importe > 15.000.000 y moneda = CLP','Sí'],['U-03','enviar_recordatorio_cobro','monto_adeudado > 20.000.000','No'],['U-04','programar_pago','importe > 5.000.000','Sí'],['U-05','emitir_factura','moneda ≠ CLP','Sí']];
 var SPARK=[2,3,2,5,4,6,5,8,7,9,6,7];
 
 /* ===== Escena isométrica simple ===== */
 (function drawOffice(){
-  var s=[], TW=80, TH=40;
+  var s=[], TW=80, TH=40, POS={};
   function P(f,gx,gy,z){return [f.cx+(gx-gy)*TW/2, f.cy-f.n*TH/2+(gx+gy)*TH/2-(z||0)];}
   function pts(a){return a.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ');}
   function box(f,gx,gy,w,d,h,z0,top,l,r){
@@ -532,18 +567,19 @@ var SPARK=[2,3,2,5,4,6,5,8,7,9,6,7];
   }
   function grid(f){var o='<g stroke="rgba(120,220,255,.14)" stroke-width="1">';for(var i=1;i<f.n;i++){var a=P(f,i,0),b=P(f,i,f.n),c=P(f,0,i),d=P(f,f.n,i);o+='<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'"/><line x1="'+c[0]+'" y1="'+c[1]+'" x2="'+d[0]+'" y2="'+d[1]+'"/>';}return o+'</g>';}
   function slab(f){return box(f,0,0,f.n,f.n,16,-16,'#0f2e57','#0a2144','#071a37').replace('stroke="rgba(120,220,255,.35)"','stroke="rgba(120,220,255,.7)"')+grid(f);}
-  function person(f,gx,gy,color){var p=P(f,gx,gy,14);return '<ellipse cx="'+p[0]+'" cy="'+(p[1]+14)+'" rx="13" ry="5" fill="rgba(0,0,0,.35)"/><path d="M'+(p[0]-10)+' '+(p[1]+12)+' v-16 q0-9 10-9 q10 0 10 9 v16z" fill="'+color+'" stroke="rgba(232,247,255,.8)" stroke-width="1.2"/><circle cx="'+p[0]+'" cy="'+(p[1]-20)+'" r="8" fill="#f0d3b6" stroke="rgba(232,247,255,.8)" stroke-width="1.2"/>';}
+  function person(f,gx,gy,color,key){var p=P(f,gx,gy,14);if(key)POS[key]=[p[0],p[1]-6];return '<ellipse cx="'+p[0]+'" cy="'+(p[1]+14)+'" rx="13" ry="5" fill="rgba(0,0,0,.35)"/><path d="M'+(p[0]-10)+' '+(p[1]+12)+' v-16 q0-9 10-9 q10 0 10 9 v16z" fill="'+color+'" stroke="rgba(232,247,255,.8)" stroke-width="1.2"/><circle cx="'+p[0]+'" cy="'+(p[1]-20)+'" r="8" fill="#f0d3b6" stroke="rgba(232,247,255,.8)" stroke-width="1.2"/>';}
   function desk(f,gx,gy,color,big){var w=big?2:1.4,d=big?1.1:.9;return box(f,gx,gy,w,d,16,0,'#1c4a82','#123861','#0d2d52')+box(f,gx+w*.35,gy+.1,.5,.12,14,16,color,'#16335c','#16335c');}
   var up={cx:600,cy:285,n:6}, lo={cx:600,cy:500,n:8};
   s.push('<defs><radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1d6fb8" stop-opacity=".55"/><stop offset="1" stop-color="#1d6fb8" stop-opacity="0"/></radialGradient></defs>');
   s.push('<ellipse cx="600" cy="520" rx="560" ry="230" fill="url(#glow)"/>');
   s.push(slab(lo));
-  [['soporte',1,1],['contabilidad',4.4,1],['rrhh',1,4.6],['operaciones',4.6,4.6]].map(function(o){return [lo,o[1],o[2],agent(o[0]).c,1]}).sort(function(a,b){return a[1]+a[2]-b[1]-b[2]}).forEach(function(i){s.push(desk(i[0],i[1],i[2],i[3]));s.push(person(i[0],i[1]+.55,i[2]-.25,i[3]));});
+  [['soporte',1,1],['contabilidad',4.4,1],['rrhh',1,4.6],['operaciones',4.6,4.6]].map(function(o){return [lo,o[1],o[2],agent(o[0]).c,1,o[0]]}).sort(function(a,b){return a[1]+a[2]-b[1]-b[2]}).forEach(function(i){s.push(desk(i[0],i[1],i[2],i[3]));s.push(person(i[0],i[1]+.55,i[2]-.25,i[3],i[5]));});
   [[360,300],[840,300],[600,420]].forEach(function(c){s.push('<rect x="'+(c[0]-6)+'" y="'+c[1]+'" width="12" height="200" fill="rgba(40,110,180,.55)" stroke="rgba(120,220,255,.5)"/>');});
   s.push(slab(up));
-  [['ventas',.6,.6],['marketing',3.6,.6],['proyectos',.6,3.6],['ceo',2.5,2.5],['comunicaciones',3.9,3.9]].sort(function(a,b){return a[1]+a[2]-b[1]-b[2]}).forEach(function(o){var c=agent(o[0]).c;s.push(desk(up,o[1],o[2],c,o[0]==='ceo'));if(o[0]!=='ceo')s.push(person(up,o[1]+.55,o[2]-.25,c));});
+  [['ventas',.6,.6],['marketing',3.6,.6],['proyectos',.6,3.6],['ceo',2.5,2.5],['comunicaciones',4.2,1.8]].sort(function(a,b){return a[1]+a[2]-b[1]-b[2]}).forEach(function(o){var c=agent(o[0]).c;s.push(desk(up,o[1],o[2],c,o[0]==='ceo'));if(o[0]!=='ceo')s.push(person(up,o[1]+.55,o[2]-.25,c,o[0]));});
   s.push('<g fill="#35e0ff" opacity=".9"><circle cx="360" cy="296" r="3"/><circle cx="840" cy="296" r="3"/><circle cx="600" cy="418" r="3"/></g>');
   $('#office').innerHTML=s.join('');
+  window.__pos=POS;
 })();
 
 /* ===== Estado ===== */
@@ -574,7 +610,7 @@ function buildGauges(){
   $('#gauges').innerHTML=defs.map(function(d){return '<li><div class="gauge"><svg viewBox="0 0 76 76" aria-hidden="true" focusable="false"><circle class="ticks" cx="38" cy="38" r="36"/><circle class="trk" cx="38" cy="38" r="30"/><circle class="arc" id="arc-'+d[0]+'" cx="38" cy="38" r="30" stroke-dasharray="'+C.toFixed(2)+'" stroke-dashoffset="'+C.toFixed(2)+'"/></svg><span class="val" id="val-'+d[0]+'" aria-hidden="true"></span></div><div><div class="g-lab">'+d[1]+'</div><div class="g-sub" id="sub-'+d[0]+'"></div></div></li>';}).join('');
   var pts=SPARK.map(function(v,i){return (i*120/(SPARK.length-1)).toFixed(1)+','+(28-v*2.8).toFixed(1)});
   $('#spark').innerHTML='<path d="M0,30 L'+pts.join(' L')+' L120,30z"/><polyline points="'+pts.join(' ')+'"/>';
-  $('#sparkTxt').textContent='Pico de '+Math.max.apply(null,SPARK)+' ejecuciones por hora a las 10:00; tendencia estable en las últimas 12 horas.';
+  $('#sparkTxt').textContent='Ilustrativa (datos de ejemplo): pico de '+Math.max.apply(null,SPARK)+' ejecuciones por hora; la métrica real se define en la implementación.';
   updateGauges();
 }
 function updateGauges(){
@@ -613,12 +649,14 @@ function stub(what){announce('Prototipo: aquí se abriría el formulario para '+
 function renderProc(){
   var el=$('#panel-0');
   var list=PROC.filter(function(p){return procArea==='all'||p[3]===procArea});
-  el.innerHTML=head(0,'Procesos de cada área y sus tareas recurrentes ('+list.length+' de '+PROC.length+' procesos; '+REC.length+' recurrentes en total).')+
+  el.innerHTML=head(0,'Procesos de cada área y sus tareas recurrentes ('+list.length+' de '+PROC.length+' procesos; '+REC.length+' recurrentes en total).','<div class="row"><button type="button" class="btn btn-primary btn-sm" id="newProc">Nuevo proceso</button><button type="button" class="btn btn-sm" id="newRec">Nueva tarea recurrente</button></div>')+
    '<div class="chips" role="group" aria-label="Filtrar por área"><button type="button" class="chip" data-k="all" aria-pressed="'+(procArea==='all')+'">Todas</button>'+
    AREAS.map(function(a){return '<button type="button" class="chip" data-k="'+a.k+'" aria-pressed="'+(procArea===a.k)+'">'+esc(a.n)+'</button>';}).join('')+'</div>'+
    '<ul class="grid cols">'+list.map(function(p){var ag=agent(p[4]),recs=REC.filter(function(r){return r[2]===p[0]});
      return '<li class="card"><h4><span class="code">'+p[0]+'</span>'+esc(p[1])+'</h4><div class="row small muted" style="margin-top:4px">'+dot(ag.c)+esc(area(p[3]).n)+' · dueño: '+esc(ag.n)+' ('+p[4]+')</div><div class="row" style="margin-top:8px"><span class="badge t-acc">'+KIND[p[2]]+'</span><span class="small muted">Se dispara: '+esc(p[5])+'</span></div>'+
-     (recs.length?'<ul class="tasks" aria-label="Tareas recurrentes de '+esc(p[1])+'">'+recs.map(function(r){return '<li><span><span class="code">'+r[0]+'</span> '+esc(r[1])+(r[3]!==p[4]?' <span class="muted">('+esc(agent(r[3]).n)+')</span>':'')+'</span><div class="muted">'+(r[4]==='auto'?'Automática':'Manual')+' · '+r[5]+' · '+r[6]+'</div></li>';}).join('')+'</ul>':'<p class="small muted tasks">Sin tareas recurrentes: se activa por evento.</p>')+'</li>';}).join('')+'</ul>';
+     (recs.length?'<ul class="tasks" aria-label="Tareas recurrentes de '+esc(p[1])+'">'+recs.map(function(r){return '<li><span><span class="code">'+r[0]+'</span> '+esc(r[1])+(r[3]!==p[4]?' <span class="muted">('+esc(agent(r[3]).n)+')</span>':'')+'</span><div class="muted">'+(r[4]==='auto'?'Automática':'Manual')+' · '+r[5]+' · '+r[6]+(r[7]?' · <span class="nd">sin delegación</span>':'')+'</div></li>';}).join('')+'</ul>':'<p class="small muted tasks">Sin tareas recurrentes: se activa por evento.</p>')+'<div class="row" style="margin-top:8px"><button type="button" class="btn btn-sm btn-ghost" data-pe="'+p[0]+'" aria-label="Editar proceso '+p[0]+'">Editar</button><button type="button" class="btn btn-sm btn-ghost" data-pd="'+p[0]+'" aria-label="Borrar proceso '+p[0]+'">Borrar</button></div></li>';}).join('')+'</ul>';
+  $('#newProc').onclick=function(){stub('crear un proceso (POST /api/processes)');};$('#newRec').onclick=function(){stub('crear una tarea recurrente (POST /api/recurring-tasks)');};
+  $$('[data-pe]',el).forEach(function(b){b.onclick=function(){stub('editar el proceso '+b.dataset.pe+' (PATCH /api/processes/:id)');};});$$('[data-pd]',el).forEach(function(b){b.onclick=function(){stub('confirmar el borrado del proceso '+b.dataset.pd+' (DELETE /api/processes/:id)');};});
   $$('.chip',el).forEach(function(b){b.onclick=function(){procArea=b.dataset.k;renderProc();$('.chip[data-k="'+procArea+'"]',el).focus();announce('Filtro: '+(procArea==='all'?'todas las áreas':area(procArea).n)+'. '+PROC.filter(function(p){return procArea==='all'||p[3]===procArea}).length+' procesos.');};});
 }
 
@@ -630,13 +668,14 @@ function renderAreas(){
   if(av.agent)return renderAgent(el,agent(av.agent));
   if(av.area)return renderArea(el,area(av.area));
   var loose=AGENTS.filter(function(a){return !a.en||!a.area});
-  el.innerHTML=head(1,'Cada área con su agente líder, sus agentes de apoyo y su estado. Abre un área para ver a todos sus agentes.','<button type="button" class="btn btn-primary btn-sm" id="newAgent">Nuevo agente</button>')+
+  el.innerHTML=head(1,'Cada área con su agente líder, sus agentes de apoyo y su estado. Abre un área para ver a todos sus agentes.','<div class="row"><button type="button" class="btn btn-sm" id="newArea">Nueva área</button><button type="button" class="btn btn-primary btn-sm" id="newAgent">Nuevo agente</button></div>')+
    '<ul class="grid cols">'+AREAS.map(function(a,i){var ags=areaAgents(a.k),lead=ags.filter(function(g){return g.role!=='Apoyo'})[0],sup=ags.length-1,n=ags.reduce(function(s,g){return s+activeCount(g.k)},0);
     return '<li class="card area-card"><h4><span class="n">'+String(i+1).padStart(2,'0')+'</span>'+esc(a.n)+'</h4><div class="row">'+dot(lead.c)+'<strong>'+esc(lead.n)+'</strong><span class="muted small">'+lead.role+' · '+lead.model+'</span></div><div class="row">'+badge(AG_ST,lead.st)+'<span class="small muted">'+n+(n===1?' tarea activa':' tareas activas')+(sup?' · '+sup+' de apoyo':'')+'</span></div>'+spark(i+1)+'<button type="button" class="btn btn-sm btn-ghost" data-area="'+a.k+'" aria-label="Abrir área '+esc(a.n)+', líder '+esc(lead.n)+'">Abrir área</button></li>';}).join('')+'</ul>'+
    '<h4 class="sec-title" id="looseT">Agentes deshabilitados o sin área ('+loose.length+')</h4>'+
    (loose.length?'<ul class="agent-grid" aria-labelledby="looseT">'+loose.map(agentRow).join('')+'</ul>':'<p class="empty">Todos los agentes están habilitados y tienen área.</p>');
   bindAgentRows(el);
   $('#newAgent').onclick=function(){av.form={area:''};renderAreas();$('#h-1').focus();};
+  $('#newArea').onclick=function(){stub('crear un área (POST /api/areas)');};
   $$('[data-area]',el).forEach(function(b){b.onclick=function(){av.area=b.dataset.area;renderAreas();$('#h-1').focus();announce('Área '+area(av.area).n+': '+areaAgents(av.area).length+(areaAgents(av.area).length===1?' agente.':' agentes.'));};});
 }
 function agentRow(g){
@@ -651,11 +690,12 @@ function bindAgentRows(el){
 function renderArea(el,a){
   var ags=AGENTS.filter(function(g){return g.area===a.k});
   el.innerHTML='<button type="button" class="btn btn-sm btn-ghost back" id="backBtn"><span aria-hidden="true">←</span> Volver a las áreas</button>'+
-   head(1,esc(a.m),'<button type="button" class="btn btn-primary btn-sm" id="newAgent">Nuevo agente en esta área</button>').replace('<h3 tabindex="-1" id="h-1">'+MODS[1][2]+'</h3>','<h3 tabindex="-1" id="h-1">Área: '+esc(a.n)+'</h3>')+
+   head(1,esc(a.m),'<div class="row"><button type="button" class="btn btn-sm" id="editArea">Editar área</button><button type="button" class="btn btn-sm btn-danger" id="delArea">Borrar área</button><button type="button" class="btn btn-primary btn-sm" id="newAgent">Nuevo agente en esta área</button></div>').replace('<h3 tabindex="-1" id="h-1">'+MODS[1][2]+'</h3>','<h3 tabindex="-1" id="h-1">Área: '+esc(a.n)+'</h3>')+
    '<h4 class="sec-title" id="agT">Agentes del área ('+ags.length+')</h4><ul class="agent-grid" aria-labelledby="agT">'+ags.map(agentRow).join('')+'</ul>';
   bindAgentRows(el);
   $('#backBtn').onclick=function(){var k=av.area;av.area=null;renderAreas();$('[data-area="'+k+'"]').focus();announce('Volviste a la lista de áreas.');};
   $('#newAgent').onclick=function(){av.form={area:a.k};renderAreas();$('#h-1').focus();};
+  $('#editArea').onclick=function(){stub('editar el área '+a.n+' (PATCH /api/areas/:id)');};$('#delArea').onclick=function(){stub('confirmar el borrado del área '+a.n+' (DELETE /api/areas/:id)');};
 }
 function renderForm(el){
   var f=av.form;
@@ -688,20 +728,24 @@ function renderAgent(el,g){
   $$('[data-del]',el).forEach(function(b){b.onclick=function(){stub('confirmar el borrado de la acción '+b.dataset.del);};});
 }
 
-/* 03 Mi día: agenda calculada (AgendaResponse, estados AgendaStatus) */
+/* 03 Mi día: agenda calculada (AgendaResponse, AgendaStatus) + resultados (TaskTree.result) + pedidos internos (D-M20) */
+var openRes={};
 function renderDay(){
   var el=$('#panel-2'),m=metrics(),ceoL=AGENDA.filter(function(a){return a.sec==='ceo'}),done=ceoL.filter(function(a){return a.s==='done'||a.s==='skipped'}).length;
-  function btns(a){var o='';if(a.s==='due'||a.s==='missed')o+='<button type="button" class="btn btn-sm btn-ghost" data-run="'+a.id+'" aria-label="Lanzar ahora '+esc(a.t)+' '+(a.code||a.id)+'">Lanzar ahora</button>';if(a.s==='failed')o+='<button type="button" class="btn btn-sm btn-ghost" data-run="'+a.id+'" aria-label="Relanzar '+esc(a.t)+' '+(a.code||a.id)+'">Relanzar</button>';if(a.sec==='late')o+='<button type="button" class="btn btn-sm btn-ghost" data-skip="'+a.id+'" aria-label="Omitir '+esc(a.t)+' '+(a.code||a.id)+'">Omitir</button>';return o;}
-  function row(a,i,n){return '<li class="card check">'+(n?'<span class="n t-acc" style="font:700 13px var(--mono)">'+String(i+1).padStart(2,'0')+'</span>':'')+'<span style="flex:1 1 220px"><strong>'+esc(a.t)+'</strong><span class="small muted"> · <span class="code">'+(a.code||a.id)+'</span> · '+a.h+' · '+(a.m==='auto'?'automática':'manual')+(a.who?' · '+a.who:'')+'</span></span>'+badge(AG_ST2,a.s)+btns(a)+'</li>';}
-  var late=AGENDA.filter(function(a){return a.sec==='late'}),oth=AGENDA.filter(function(a){return a.sec==='areas'});
-  el.innerHTML=head(2,'Agenda del CEO: las rutinas R-DIR del día con su estado. Las automáticas las lanza el programador; las manuales, tú. Hora simulada: '+NOW+'.')+
+  function lbl(a){return esc(a.t)+' '+(a.code||a.id);}
+  function btns(a){var o='';if(a.s==='due'||a.s==='missed')o+='<button type="button" class="btn btn-sm btn-ghost" data-run="'+a.id+'" aria-label="Lanzar ahora '+lbl(a)+'">Lanzar ahora</button><button type="button" class="btn btn-sm btn-ghost" data-skip="'+a.id+'" aria-label="Omitir '+lbl(a)+'">Omitir</button>';if(a.s==='failed')o+='<button type="button" class="btn btn-sm btn-ghost" data-run="'+a.id+'" aria-label="Relanzar '+lbl(a)+'">Relanzar</button>';if(a.res)o+='<button type="button" class="btn btn-sm btn-ghost" data-res="'+a.id+'" aria-expanded="'+!!openRes[a.id]+'" aria-controls="res-'+a.id.replace('@','-')+'" aria-label="Ver resultado '+lbl(a)+'">Ver resultado</button>';return o;}
+  function row(a,i,n){var rid='res-'+a.id.replace('@','-');return '<li class="card check">'+(n?'<span class="n t-acc" style="font:700 13px var(--mono)">'+String(i+1).padStart(2,'0')+'</span>':'')+'<span style="flex:1 1 220px"><strong>'+esc(a.t)+'</strong><span class="small muted"> · <span class="code">'+(a.code||a.id)+'</span> · '+a.h+' · '+(a.m==='auto'?'automática':'manual')+(a.nd?' · <span class="nd">sin delegación</span>':'')+(a.who?' · '+a.who:'')+'</span></span>'+badge(AG_ST2,a.s)+btns(a)+(a.res?'<div class="res" id="'+rid+'" role="region" aria-label="Resultado de '+lbl(a)+'"'+(openRes[a.id]?'':' hidden')+'><b>Resultado</b>\n'+esc(a.res)+'</div>':'')+'</li>';}
+  var late=AGENDA.filter(function(a){return a.sec==='late'}),oth=AGENDA.filter(function(a){return a.sec==='areas'||a.sec==='re'});
+  el.innerHTML=head(2,'Agenda del CEO: las rutinas R-DIR del día con su estado y lo que te dejan para decidir. Las automáticas las lanza el programador; las manuales, tú. Hora simulada: '+NOW+'.')+
    '<div class="small" id="dayTxt">'+done+' de '+ceoL.length+' rutinas del CEO resueltas</div><div class="progress" aria-hidden="true"><i id="dayBar" style="width:'+(done*100/ceoL.length)+'%"></i></div>'+
    '<h4 class="group-title">Rutina de hoy (R-DIR)</h4><ul class="grid">'+ceoL.map(function(a,i){return row(a,i,1)}).join('')+'</ul>'+
-   '<h4 class="group-title">Manuales y fallidas de las áreas, hoy</h4><ul class="grid">'+oth.map(function(a){return row(a)}).join('')+'</ul>'+
+   '<h4 class="group-title">Escalado a ti y pedidos internos (D-M20)</h4><p class="small muted" style="background:var(--plate);padding:6px 10px">Líneas [ESCALAR] y [TRASPASO área] de los resultados recientes. El CEO las evalúa como pedidos internos; lo que delegue a partir de ellas hereda la marca de entrada no confiable.</p><ul class="grid">'+PEDIDOS.map(function(x){return '<li class="card pedido"><span class="badge t-warn">'+esc(x[0])+'</span><strong>'+esc(x[1])+'</strong><span style="flex:1 1 260px">'+esc(x[2])+'</span></li>';}).join('')+'</ul>'+
+   '<h4 class="group-title">Manuales, fallidas y relanzadas de hoy</h4><ul class="grid">'+oth.map(function(a){return row(a)}).join('')+'</ul>'+
    '<h4 class="group-title">Atrasadas (días anteriores)</h4>'+(late.length?'<ul class="grid">'+late.map(function(a){return row(a)}).join('')+'</ul>':'<p class="empty">No hay tareas atrasadas.</p>')+
    '<h4 class="group-title">Ejecuciones</h4><ul class="grid"><li class="card check"><span style="flex:1 1 200px">Aprobar ejecuciones pendientes: <strong id="dayPend">'+m.pend+'</strong></span><button type="button" class="btn btn-sm btn-primary" id="goRuns">Ir a aprobaciones</button></li></ul>';
-  $$('[data-run]',el).forEach(function(b){b.onclick=function(){var a=AGENDA.filter(function(x){return x.id===b.dataset.run})[0],was=a.s;a.s='running';renderDay();$('#h-2').focus();announce((was==='failed'?'Relanzada: ':'Lanzada: ')+a.t+' ('+(a.code||a.id)+'). Estado: en curso.');};});
-  $$('[data-skip]',el).forEach(function(b){b.onclick=function(){var a=AGENDA.filter(function(x){return x.id===b.dataset.skip})[0];a.s='skipped';renderDay();$('#h-2').focus();announce('Omitida: '+a.t+' ('+(a.code||a.id)+').');};});
+  $$('[data-res]',el).forEach(function(b){b.onclick=function(){var id=b.dataset.res;openRes[id]=!openRes[id];b.setAttribute('aria-expanded',!!openRes[id]);$('#res-'+id.replace('@','-')).hidden=!openRes[id];};});
+  $$('[data-run]',el).forEach(function(b){b.onclick=function(){var a=AGENDA.filter(function(x){return x.id===b.dataset.run})[0],was=a.s,late=a.sec==='late';a.s='running';a.sec='re';renderDay();$('#h-2').focus();announce((was==='failed'?'Relanzada: ':'Lanzada: ')+a.t+' ('+(a.code||a.id)+')'+(late?' con la fecha '+a.date:'')+'. Estado: en curso.'+(late?' Salió de Atrasadas.':''));};});
+  $$('[data-skip]',el).forEach(function(b){b.onclick=function(){var a=AGENDA.filter(function(x){return x.id===b.dataset.skip})[0];a.s='skipped';if(a.sec==='late')a.sec='gone';renderDay();$('#h-2').focus();announce('Omitida: '+a.t+' ('+(a.code||a.id)+').');};});
   $('#goRuns').onclick=function(){selectTab(4,true);};
 }
 
@@ -723,8 +767,11 @@ function renderRuns(){
   var el=$('#panel-4'),pend=RUNS.filter(function(r){return r.s==='pending_approval'}).sort(function(a,b){return (b.urg-a.urg)||(b.hw-a.hw)}),hist=RUNS.filter(function(r){return r.s!=='pending_approval'}).sort(function(a,b){return b.at<a.at?-1:1});
   el.innerHTML=head(4,'Bandeja de aprobaciones (urgentes primero) e historial de ejecuciones de hoy.')+
    '<h4 class="group-title" id="inboxT" tabindex="-1" style="margin-top:0">Bandeja · '+pend.length+(pend.length===1?' pendiente':' pendientes')+'</h4>'+
-   (pend.length?'<ul class="grid">'+pend.map(function(r,i){var a=agent(r.a);return '<li class="card run" data-id="'+r.id+'"><h4><span class="n">'+String(i+1).padStart(2,'0')+'</span><span id="rt-'+r.id+'">'+esc(r.n)+'</span>'+(r.urg?'<span class="badge t-bad"><span aria-hidden="true">!</span>Urgente</span>':'')+'</h4><div class="row small muted">'+dot(a.c)+esc(a.n)+' · '+esc(area(a.area).n)+' · solicitada a las '+r.at+' · '+r.hw+(r.hw===1?' hora hábil':' horas hábiles')+' esperando</div><div class="params">'+Object.keys(r.pr).map(function(k){return '<span>'+esc(k)+': <b>'+esc(r.pr[k])+'</b></span>';}).join('')+'</div><p class="small muted">'+srcText(r)+'</p><label class="note-label" for="note-'+r.id+'" style="margin-top:8px">'+(r.rn?'Nota (obligatoria para aprobar, política '+r.pol+')':'Nota (opcional)')+'</label><textarea id="note-'+r.id+'" rows="2" placeholder="Se la entregamos al agente"'+(r.rn?' aria-required="true"':'')+' aria-describedby="err-'+r.id+'"></textarea><p class="small t-bad" id="err-'+r.id+'" hidden>Esta ejecución exige una nota para aprobarla (la API respondería 400). Puedes rechazar sin nota.</p><div class="actions"><button type="button" class="btn btn-primary btn-sm" data-ok="'+r.id+'" aria-label="Aprobar '+esc(r.n)+' de '+esc(r.pr.Cliente||r.pr.Persona||a.n)+'">Aprobar</button><button type="button" class="btn btn-danger btn-sm" data-no="'+r.id+'" aria-label="Rechazar '+esc(r.n)+' de '+esc(r.pr.Cliente||r.pr.Persona||a.n)+'">Rechazar</button></div></li>';}).join('')+'</ul>':'<p class="empty" id="emptyInbox" tabindex="-1">No hay ejecuciones pendientes. Buen trabajo.</p>')+
-   '<h4 class="group-title">Historial de hoy</h4><ul class="hist">'+hist.map(function(r){return '<li><span><strong>'+esc(r.n)+'</strong> · '+esc(agent(r.a).n)+' · '+r.at+'</span>'+badge(R_ST,r.s)+(r.err?'<span class="sub">Error: '+esc(r.err)+'</span>':'')+(r.note?'<span class="sub note-row">Nota: '+esc(r.note)+'</span>':'')+'</li>';}).join('')+'</ul>';
+   (pend.length?'<ul class="grid">'+pend.map(function(r,i){var a=agent(r.a);return '<li class="card run" data-id="'+r.id+'"><h4><span class="n">'+String(i+1).padStart(2,'0')+'</span><span id="rt-'+r.id+'">'+esc(r.n)+'</span>'+(r.urg?'<span class="badge t-bad"><span aria-hidden="true">!</span>Urgente</span>':'')+'</h4><div class="row small muted">'+dot(a.c)+esc(a.n)+' · '+esc(area(a.area).n)+' · solicitada '+r.at+' · '+String(r.hw).replace('.',',')+' h hábiles esperando (jornada 09:00–18:00)</div><div class="params">'+Object.keys(r.pr).map(function(k){return '<span>'+esc(k)+': <b>'+esc(r.pr[k])+'</b></span>';}).join('')+'</div><p class="small muted">'+srcText(r)+'</p><label class="note-label" for="note-'+r.id+'" style="margin-top:8px">'+(r.rn?'Nota (obligatoria para aprobar, política '+r.pol+')':'Nota (opcional)')+'</label><textarea id="note-'+r.id+'" rows="2" placeholder="Se la entregamos al agente"'+(r.rn?' aria-required="true"':'')+' aria-describedby="err-'+r.id+'"></textarea><p class="small t-bad" id="err-'+r.id+'" hidden>Esta ejecución exige una nota para aprobarla (la API respondería 400). Puedes rechazar sin nota.</p><div class="actions"><button type="button" class="btn btn-primary btn-sm" data-ok="'+r.id+'" aria-label="Aprobar '+esc(r.n)+' de '+esc(r.pr.Cliente||r.pr.Persona||a.n)+'">Aprobar</button><button type="button" class="btn btn-danger btn-sm" data-no="'+r.id+'" aria-label="Rechazar '+esc(r.n)+' de '+esc(r.pr.Cliente||r.pr.Persona||a.n)+'">Rechazar</button></div></li>';}).join('')+'</ul>':'<p class="empty" id="emptyInbox" tabindex="-1">No hay ejecuciones pendientes. Buen trabajo.</p>')+
+   '<h4 class="group-title">Historial de hoy</h4><ul class="hist">'+hist.map(function(r){return '<li><span><strong>'+esc(r.n)+'</strong> · '+esc(agent(r.a).n)+' · '+r.at+'</span>'+badge(R_ST,r.s)+(r.err?'<span class="sub">Error: '+esc(r.err)+'</span>':'')+(r.note?'<span class="sub note-row">Nota: '+esc(r.note)+'</span>':'')+'</li>';}).join('')+'</ul>'+
+   '<h4 class="group-title">Políticas de aprobación (U-01 a U-05)</h4><div class="cfg"><button type="button" class="btn btn-sm btn-primary" id="newPol">Nueva política</button></div><ul class="grid">'+POL.map(function(x){return '<li class="card check"><span style="flex:1 1 260px"><span class="code">'+x[0]+'</span> · <code>'+x[1]+'</code> · '+esc(x[2])+' · nota obligatoria: <strong>'+x[3]+'</strong></span><button type="button" class="btn btn-sm btn-ghost" data-pole="'+x[0]+'" aria-label="Editar política '+x[0]+'">Editar</button><button type="button" class="btn btn-sm btn-ghost" data-pold="'+x[0]+'" aria-label="Borrar política '+x[0]+'">Borrar</button></li>';}).join('')+'</ul>';
+  $('#newPol').onclick=function(){stub('crear una política (POST /api/approval-policies)');};
+  $$('[data-pole]',el).forEach(function(b){b.onclick=function(){stub('editar la política '+b.dataset.pole+' (PATCH /api/approval-policies/:id)');};});$$('[data-pold]',el).forEach(function(b){b.onclick=function(){stub('confirmar el borrado de la política '+b.dataset.pold+' (DELETE /api/approval-policies/:id)');};});
   $$('textarea',el).forEach(function(t){if(drafts[t.id])t.value=drafts[t.id];});
   $$('[data-ok]',el).forEach(function(b){b.onclick=function(){resolve(b.dataset.ok,true);};});
   $$('[data-no]',el).forEach(function(b){b.onclick=function(){resolve(b.dataset.no,false);};});
@@ -753,16 +800,19 @@ $('#reqForm').addEventListener('submit',function(e){
 rq.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#reqForm').requestSubmit();}});
 
 /* ===== Abrir / cerrar con transición ===== */
-function open(){
+function open(opener,agentKey){
   if(state!=='closed')return;
-  state='dolly';trigger=ceo;app.inert=true;
+  if(agentKey){active=1;av={area:null,agent:agentKey,form:null};}
+  state='dolly';trigger=opener||ceo;app.inert=true;
   var rm=reduced();
   if(rm)show(rm);else{document.body.classList.add('dolly');T(function(){show(rm);},780);}
 }
+function setBars(){var t=$('.topbar'),r=$('.rail');hud.style.setProperty('--bt',(t.offsetHeight+8+8)+'px');hud.style.setProperty('--br',(r.offsetHeight+8+8)+'px');}
+window.addEventListener('resize',setBars);
 function show(rm){
   state='opening';document.body.classList.add('hud-open');hud.hidden=false;hud.dataset.state='opening';
-  selectTab(active,false,true);
-  $('#tab-'+active).focus({preventScroll:true});
+  selectTab(active,false,true);setBars();
+  if(av.agent&&active===1){$('#h-1').focus({preventScroll:true});}else $('#tab-'+active).focus({preventScroll:true});
   announce('Centro de mando abierto. Módulo '+(active+1)+' de 5: '+MODS[active][2]+'. Usa las flechas para cambiar de módulo y Escape para cerrar.');
   T(function(){state='open';hud.dataset.state='open';},rm?130:1000);
 }
@@ -778,7 +828,8 @@ function finish(){
   (trigger||ceo).focus({preventScroll:true});
   announce('Centro de mando cerrado. Volviste a la oficina.'+(kept?' Se conservaron tus borradores.':''),true);
 }
-ceo.addEventListener('click',open);
+ceo.addEventListener('click',function(){open(ceo);});
+(function(){var pos=window.__pos||{},box=$('.scene-box');Object.keys(pos).forEach(function(k){var a=agent(k),b=document.createElement('button');b.type='button';b.className='agent-btn';b.setAttribute('aria-label',a.n+' — abrir ficha del agente');b.style.left=(pos[k][0]/12)+'%';b.style.top=(pos[k][1]/7)+'%';b.innerHTML='<span class="tip" aria-hidden="true">'+esc(a.n)+'</span>';b.addEventListener('click',function(){open(b,k);});box.appendChild(b);});})();
 $('#closeBtn').addEventListener('click',close);
 
 hud.addEventListener('keydown',function(e){
