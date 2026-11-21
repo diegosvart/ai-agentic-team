@@ -98,7 +98,7 @@ Formato de cada ficha: **disparador** → **pasos** → **salida**, con dueño, 
 - KPI: informe entregado antes de las 10:00.
 
 **P-DIR-03 Cierre y planificación mensual** — dueño: `ceo`.
-- Disparador: primer día hábil del mes, 09:30.
+- Disparador: 4.º día hábil del mes, 09:30 (el cierre contable de R-FIN-04 es el 3.º).
 - Pasos: 1) recibe el cierre de Finanzas (P-FIN-03); 2) revisa margen por proyecto con Proyectos;
   3) revisa pipeline con Comercial; 4) redacta el informe mensual y las metas del mes.
 - Salida: informe mensual. Aprobación: el Dueño valida las metas (aprobación de documento, §8.2).
@@ -214,7 +214,7 @@ Reglas de la rutina:
 - Una tarea que corre varias veces al día se registra como una recurrente por horario (sufijos
   `a`, `b`, `c`): una ejecución por recurrente y día.
 - Las cinco son **automáticas** (se ejecutan solas a su hora). R-DIR-04 y R-DIR-05 solo preparan
-  información; R-DIR-01, R-DIR-02 y R-DIR-03 además **delegan**, y lo delegado se ejecuta con las
+  información, y el sistema lo impone: corren sin poder delegar; R-DIR-01, R-DIR-02 y R-DIR-03 además **delegan**, y lo delegado se ejecuta con las
   reglas de aprobación normales (más la de entrada no confiable de §8.4).
 - "Recibe" significa que el sistema le entrega al CEO esa información al lanzar la tarea (la agenda,
   las tareas abiertas, las aprobaciones pendientes o la salida de `leer_bandeja`). El CEO no corre
@@ -222,11 +222,11 @@ Reglas de la rutina:
 
 ### 6.2 Semanal y mensual
 
-| Frecuencia | Tarea | Proceso |
-|------------|-------|---------|
-| Lunes 09:00 | R-DIR-06 Revisión semanal de desempeño | P-DIR-02 |
-| Viernes 16:00 | R-DIR-07 Revisión de pipeline con Comercial | P-COM-01 |
-| 1.er día hábil, 09:30 | R-DIR-08 Cierre y planificación mensual | P-DIR-03 |
+| Frecuencia | Tarea | Proceso | Modo |
+|------------|-------|---------|------|
+| Lunes 09:00 | R-DIR-06 Revisión semanal de desempeño | P-DIR-02 | Automática |
+| Viernes 16:00 | R-DIR-07 Revisión de pipeline con Comercial | P-COM-01 | Automática |
+| 4.º día hábil, 09:30 | R-DIR-08 Cierre y planificación mensual | P-DIR-03 | Automática |
 
 ## 7. Tareas recurrentes por área
 
@@ -269,7 +269,7 @@ Reglas de la rutina:
 
 | Lo que dice un proceso | Cómo ocurre |
 |------------------------|-------------|
-| "Escala al CEO" | El agente termina su subtarea con una línea `[ESCALAR] motivo` en el resultado. El CEO la ve en los resultados recientes de R-DIR-02 y R-DIR-03. |
+| "Escala al CEO" | El agente termina su subtarea con una línea `[ESCALAR] motivo` en el resultado. El sistema extrae esas líneas y se las entrega al CEO como pedidos internos en R-DIR-02 y R-DIR-03. |
 | "Pide a Finanzas / a Proyectos" (traspaso) | El agente deja `[TRASPASO área] pedido` en su resultado; el CEO lo convierte en una subtarea para esa área en su siguiente revisión. |
 | "Reintenta o reasigna" | El CEO crea una subtarea nueva (no se edita la fallida). |
 | "Urgente" | Se calcula por antigüedad en horas hábiles (§6.1); no se guarda. |
@@ -312,8 +312,11 @@ Reglas de los umbrales:
 - La única excepción a "efecto externo = aprobación" es la de §2 (U-03), y se declara como política;
   no se agregan excepciones sin escribirlas aquí.
 - **Entrada no confiable:** el correo y cualquier texto de terceros llegan como datos, nunca como
-  instrucciones. En todo trabajo que nace de una entrada no confiable (p. ej. lo que delega R-DIR-01),
-  **toda** acción con efecto externo pide aprobación, incluida la excepción U-03.
+  instrucciones. Se considera trabajo de entrada no confiable todo lo que nace de un mensaje entrante
+  (webhook) y todo lo que delegan las recurrentes del CEO que reciben información (R-DIR-01 a
+  R-DIR-06), porque esa información puede arrastrar texto de terceros de días anteriores. En ese
+  trabajo **toda** acción con efecto externo pide aprobación, incluida la excepción U-03, que queda
+  solo para solicitudes del Dueño y recurrentes de área como R-FIN-01.
 - Las credenciales nunca viajan en parámetros ni en `connectorConfig` (ver `docs/INTEGRATIONS.md` §4).
 
 ### 8.5 RACI de procesos clave

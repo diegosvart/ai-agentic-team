@@ -1,6 +1,6 @@
 # PLAN — Modelo de procesos (M-00…M-10)
 
-Implementa [SPEC.md](SPEC.md) (revisión 1). Método igual al de `plan-oficina-v2` (ver su LOOP.md §6):
+Implementa [SPEC.md](SPEC.md) (revisión 2). Método igual al de `plan-oficina-v2` (ver su LOOP.md §6):
 
 - **Orquestador:** Opus. Integra con `merge --no-ff` en la rama de integración y no hace push sin
   permiso del usuario.
@@ -9,6 +9,9 @@ Implementa [SPEC.md](SPEC.md) (revisión 1). Método igual al de `plan-oficina-v
 - **Challenger:** subagente nuevo por entrega, en Opus. Usa la `RUBRICA.md` de `plan-oficina-v2`
   más los criterios de la tarea y aprueba con **85 o más**. Bajo 85, la tarea vuelve con sus
   hallazgos; tras dos rechazos, se escala al usuario.
+- **Prueba de integración de ola:** al integrar cada ola, el orquestador corre la suite completa
+  (incluida `e2e.test.ts`) antes de abrir la siguiente. Los fallos que solo aparecen al combinar
+  tareas (p. ej. seed + políticas en la Ola 3) se detectan ahí.
 - **Evidencia mínima por tarea:** `npm run typecheck`, `npm test` (salvedad D-16: EBUSY de
   `server/test/store.test.ts` en Windows), las pruebas nuevas nombradas y el diff acotado a los
   archivos de la tarea.
@@ -17,9 +20,9 @@ Implementa [SPEC.md](SPEC.md) (revisión 1). Método igual al de `plan-oficina-v
 
 | Id | Entregable | Estado |
 |----|------------|--------|
-| E-01 | PROCESOS.md | Revisión 1 tras el challenger (70/100); en segunda revisión |
-| E-02 | SPEC.md | Revisión 1 (cambios en SPEC §12); en segunda revisión |
-| E-03 | PLAN.md (este archivo) | Olas y archivos corregidos; en segunda revisión |
+| E-01 | PROCESOS.md | Revisión 2 (ciclo 1: 70; ciclo 2: 76). Escalado al usuario por la regla de dos rechazos |
+| E-02 | SPEC.md | Revisión 2 (cambios en SPEC §12) |
+| E-03 | PLAN.md (este archivo) | Revisión 2 |
 
 Las preguntas abiertas Q1–Q3 de PROCESOS.md se cierran con el usuario antes de la Ola 1.
 
@@ -39,9 +42,9 @@ Ola 7: M-10
   necesita evaluarla para el prefetch y para la regla de entrada no confiable.
 - M-04 y M-07 no comparten archivos: M-04 toca el motor, la validación y la API; M-07 toca el seed,
   el mock y sus pruebas.
-- M-06 y M-09 no comparten archivos: M-06 toca el programador, la config y el composition root; M-09
-  toca `llm/`, `contracts.ts` y la guía.
-- M-05 y M-09 tocan `contracts.ts` y van en olas distintas.
+- M-06 y M-09 no comparten archivos: M-06 toca el programador, `config.ts`, `Config` en
+  `contracts.ts` y el composition root; M-09 toca `llm/anthropic.ts`, `llm/mock.ts`, una línea del
+  motor y la guía. Los cambios de interfaz del LLM los hace M-05, no M-09.
 
 ## Tareas
 
@@ -60,8 +63,15 @@ Ola 7: M-10
 - Criterio: el web y el servidor compilan **sin cambios** en su código.
 
 ### M-02 · Store: tablas, migración y CRUD
-- Archivos: `server/src/store/index.ts`, `server/src/contracts.ts` (interfaz `Store`, incluido
-  `updateTask` con `context` y `untrustedInput`) y `server/test/store-model.test.ts` (nuevo).
+- Archivos:
+  - `server/src/store/index.ts`;
+  - `server/src/contracts.ts`: interfaz `Store` con `createTask` ampliado, `updateTask` con
+    `context`, `materializeOccurrence`, `relaunchOccurrence`, `listTenants` y filtros de
+    `listRootTasks`;
+  - `shared/src/index.ts`: los campos que pasan a requeridos;
+  - `server/test/store-model.test.ts` (nuevo);
+  - adaptación sin cambiar aserciones de `server/test/engine.test.ts`,
+    `server/test/llm-mock.test.ts` y `server/test/connectors.test.ts` (SPEC §9).
 - Implementa SPEC §4:
   - tablas y columnas;
   - migración idempotente;
@@ -73,7 +83,7 @@ Ola 7: M-10
 - Pruebas:
   - criterio 1 de SPEC §10;
   - el CRUD;
-  - el choque de `UNIQUE` en ocurrencias;
+  - el choque de `UNIQUE` en ocurrencias (`materializeOccurrence` devuelve `null` sin efectos);
   - cada regla de la tabla de borrado.
 - Ojo: bases temporales con nombre único y cerradas antes de borrarlas (es el origen del EBUSY de
   D-16).
@@ -85,7 +95,7 @@ Ola 7: M-10
   - `zonedTimeToUtc(date, time, tz)`;
   - `localDateOf(now, tz)`;
   - `businessDaysOfMonth(...)`;
-  - `businessHoursBetween(a, b, profile)` (para la urgencia).
+  - `businessHoursBetween(a, b, profile)` (para la urgencia, con `workHours`).
 - Pruebas: criterio 3, y `businessHoursBetween` cruzando un fin de semana.
 - El challenger mira en especial los saltos de horario y los meses sin el n-ésimo día hábil.
 
@@ -96,39 +106,48 @@ Ola 7: M-10
   - `server/src/engine/index.ts`: uso de esa función en el bucle de herramientas y la regla de nota
     en `resolveApproval`;
   - `server/src/engine/validation.ts`: validación de políticas;
-  - `server/src/api/index.ts` y `server/src/api/schemas.ts`: `sideEffect` en acciones y el 400 de la
-    nota;
+  - `server/src/api/index.ts` y `server/src/api/schemas.ts`: `sideEffect` en acciones e
+    `invalid: 400` en `CODE_STATUS` para el error de nota;
   - `server/test/policies.test.ts` (nuevo).
 - Implementa SPEC §5.3 y D-M17. La parte de "árbol no confiable" se prueba con una raíz marcada a
   mano.
 - Pruebas: criterio 7 completo, más:
-  - parámetro ausente → aplica;
+  - parámetro ausente → aplica (con una acción de prueba de parámetro opcional);
   - `untrustedInput` + `external` → aplica con `approvalSource = 'untrusted_input'`.
 
 ### M-07 · Seed `servicios-b2b` y mock del LLM
 - Archivos:
   - `server/src/store/seed.ts`;
+  - `server/src/store/index.ts`: solo `seedIfEmpty` y `SeedHost`, para cargar el seed nuevo;
+  - `server/test/store.test.ts`: solo las aserciones del seed (SPEC §9);
   - `server/src/llm/mock.ts`: ruteo de D-M16, solo la parte de selección de agentes;
   - `server/test/seed.test.ts` (nuevo);
   - `server/test/mock-routing.test.ts` (nuevo).
 - El seed de SPEC §8 es una función pura. Las bases nuevas lo cargan; las migradas, no.
-- Pruebas: criterio 2 y las pruebas doradas del criterio 10.
+- Pruebas: criterio 2 y las pruebas doradas del criterio 10, que fijan agentes, acciones y parámetros.
 - **`e2e.test.ts` no se modifica.** Si falla, se ajusta el seed o los sinónimos.
 
 ### M-05 · Motor: materialización, contexto y prefetch
 - Archivos:
   - `server/src/engine/index.ts`: `materializeScheduled`, `startScheduled`, `synthesis` respetado
     en `refreshRoot`, la síntesis y la recuperación, y `origin` en `submitRequest`;
-  - `server/src/contracts.ts`: interfaz `Engine`;
+  - `server/src/contracts.ts`: interfaz `Engine` y entradas opcionales de `LLMProvider` (`plan`
+    con `structure`, `context` e `internalRequests`; `startConversation` y `step` con
+    `areaProcesses`; `PlannedSubtask.processKey`);
+  - `server/src/llm/anthropic.ts` y `server/src/llm/mock.ts`: solo aceptar las entradas nuevas
+    (el formato lo da M-09);
   - `server/test/engine-scheduled.test.ts` (nuevo).
-- Implementa SPEC §5.2 y la recuperación de §5.1. El `context` llega al LLM como entrada separada:
-  M-05 pasa el campo y M-09 lo da formato.
+- Implementa SPEC §5.2, la recuperación de §5.1, D-M19 (`allowDelegation`) y D-M20 (extracción de
+  marcadores). El `context` llega al LLM como entrada separada: M-05 pasa el campo y M-09 le da
+  formato.
 - Pruebas: criterios 5 y 6, con el LLM simulado contando las llamadas de planificación y síntesis.
-  Incluye el caso con aprobación y reinicio.
+  Incluye el caso con aprobación y reinicio, y el de reinicio después de crear la hija pasante.
 
 ### M-06 · Programador
-- Archivos: `server/src/scheduler/index.ts` (nuevo), `server/src/config.ts`, `server/src/index.ts`
-  (composition root) y `server/test/scheduler.test.ts` (nuevo).
+- Archivos: `server/src/scheduler/index.ts` (nuevo), `server/src/config.ts`, `Config` en
+  `server/src/contracts.ts` (campos nuevos **opcionales**, para no romper los literales de
+  `engine.test.ts` y `llm-mock.test.ts`), `server/src/index.ts` (composition root) y
+  `server/test/scheduler.test.ts` (nuevo).
 - Implementa SPEC §5.1 y D-M18:
   - reloj inyectable;
   - un ciclo al arrancar;
@@ -139,9 +158,8 @@ Ola 7: M-10
 ### M-09 · Prompts, contexto no confiable y guía
 - Archivos:
   - `server/src/llm/anthropic.ts`: `buildPlanSystem` y `buildAgentSystem` con la estructura,
-    `processKey` en el esquema del plan y el bloque `<datos_no_confiables>`;
-  - `server/src/contracts.ts`: entrada de `LLMProvider.plan` con `structure` y `context`, y
-    `PlannedSubtask.processKey`;
+    `processKey` en el esquema del plan y los bloques `<datos_no_confiables>` y
+    `<pedidos_internos>`;
   - `server/src/llm/mock.ts`: devuelve `processKey`;
   - `server/src/engine/index.ts`: solo para pasar `structure` al LLM;
   - `server/test/prompt-structure.test.ts` (nuevo);
@@ -154,7 +172,8 @@ Ola 7: M-10
 
 ### M-08 · API REST y agenda
 - Archivos: `server/src/api/index.ts`, `server/src/api/schemas.ts`, `server/src/agenda.ts` (nuevo,
-  cálculo puro de la agenda) y `server/test/api-model.test.ts` (nuevo).
+  cálculo puro de la agenda), `server/test/api-model.test.ts` (nuevo) y la adaptación del doble de
+  `server/test/api.test.ts` (SPEC §9).
 - Implementa SPEC §6 y §5.4, con los cambios a rutas existentes y la compatibilidad de agentes de §3.
 - Pruebas: criterio 8, una prueba por ruta (éxito, 400, 404 y 409 donde aplique) y los casos de
   `area` y `areaId` de §3.
