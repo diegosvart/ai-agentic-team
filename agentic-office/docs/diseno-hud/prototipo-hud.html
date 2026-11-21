@@ -30,7 +30,7 @@ button,input,textarea{font:inherit;color:inherit}
 /* ===== Escena (oficina simulada) ===== */
 #app{position:fixed;inset:0;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#0d2a4f 0,#071a36 55%,#030b1a 100%)}
 .scene-wrap{position:absolute;inset:0;transform-origin:50% 42%;transition:transform 800ms var(--ease),filter 800ms var(--ease)}
-body.dolly .scene-wrap{transform:translate(-6%,-17.5%) scale(.68);filter:saturate(.9) brightness(.9)}
+body.dolly .scene-wrap{transform:translate(var(--dx,0px),var(--dy,0px)) scale(var(--s,.68));filter:saturate(.9) brightness(.9)}
 body.hud-open .demo-bar{visibility:hidden}
 .scene-box{position:absolute;left:50%;top:50%;width:max(100vw,calc(100vh*12/7));height:max(calc(100vw*7/12),100vh);transform:translate(-50%,-50%)}
 .scene-box svg{position:absolute;inset:0;width:100%;height:100%}
@@ -56,14 +56,14 @@ body.hud-open .demo-bar{visibility:hidden}
 .note-row{overflow-wrap:anywhere}
 
 /* ===== HUD ===== */
-.hud{position:fixed;inset:0;z-index:20;display:grid;grid-template-columns:108px minmax(0,1fr) 292px;grid-template-rows:auto minmax(120px,22vh) minmax(0,1fr) auto;gap:14px;padding:18px 24px;background:radial-gradient(ellipse at 44% 22%,rgba(2,10,26,0) 0,rgba(2,10,26,.10) 25%,rgba(2,8,22,.5) 90%)}
+.hud{position:fixed;inset:0;z-index:20;display:grid;grid-template-columns:108px minmax(0,1fr) 292px;grid-template-rows:auto minmax(150px,31vh) minmax(0,1fr) auto;gap:14px;padding:18px 24px;background:radial-gradient(ellipse at 44% 22%,rgba(2,10,26,0) 0,rgba(2,10,26,.10) 25%,rgba(2,8,22,.5) 90%)}
 .topbar{grid-column:1/-1}
 .rail{grid-column:1;grid-row:2/5}
 .window{grid-column:2;grid-row:2;position:relative;pointer-events:none}
 .window i{position:absolute;width:26px;height:26px;border:2px solid var(--accent)}
 .window i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0}.window i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0}
 .window i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0}.window i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0}
-.window b{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);background:var(--solid);border:1px solid var(--line-dim);color:var(--dim);font:700 11px var(--mono);letter-spacing:.14em;padding:2px 10px;text-transform:uppercase;white-space:nowrap}
+.window b{position:absolute;left:34px;top:6px;background:var(--solid);border:1px solid var(--line-dim);color:var(--dim);font:700 11px var(--mono);letter-spacing:.14em;padding:2px 10px;text-transform:uppercase;white-space:nowrap}
 .center{grid-column:2;grid-row:3;display:flex;flex-direction:column;min-height:0}
 .reqbar{grid-column:2;grid-row:4}
 .side{grid-column:3;grid-row:2/5;display:flex;flex-direction:column;gap:14px;min-height:0;overflow:auto}
@@ -258,6 +258,7 @@ html.rm .gauge .arc,html.rm .progress i{transition:none}
   .hud{display:flex;flex-direction:column;gap:10px;padding:8px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
   .hud>*{flex-shrink:0}
   .window{display:block;order:1;flex:none;min-height:15vh}
+  .window b{display:none}
   .hud{scroll-padding-top:var(--bt,120px);scroll-padding-bottom:var(--br,96px)}
   .toggle{width:44px;height:44px}
   .topbar{order:0;flex-wrap:wrap;gap:8px;padding:8px 12px;min-height:0;position:sticky;top:0;z-index:3}
@@ -271,7 +272,7 @@ html.rm .gauge .arc,html.rm .progress i{transition:none}
   .rail-title{display:none}
   .tab{width:auto;flex:1;min-width:0;padding:4px 0}
   .hex{width:40px;height:45px;font-size:14px}
-  .cnt{right:50%;margin-right:-26px}
+  .cnt{right:auto;left:calc(50% + 11px);top:-5px;min-width:18px;height:18px;font-size:11px;padding:0 4px}
   .gauges{grid-template-columns:repeat(4,1fr);gap:6px}
   .gauges li{flex-direction:column;text-align:center;gap:4px;padding:6px 2px}
   .gauge{width:44px;height:44px}
@@ -286,12 +287,10 @@ html.rm .gauge .arc,html.rm .progress i{transition:none}
   .btn{min-height:44px}
   .chip{min-height:40px}
   .demo-bar{font-size:12px}
-  body.dolly .scene-wrap{transform:translateY(-17%) scale(.62)}
 }
 @media (max-width:360px){
-  .tab{font-size:11px}
+  .tab{font-size:10px;letter-spacing:-.02em}
   .hex{width:34px;height:38px;font-size:12px}
-  .cnt{margin-right:-20px}
   .gauges{grid-template-columns:1fr 1fr}
   .topbar h2{font-size:13px;letter-spacing:.06em}
   .tabpanel{padding:12px 8px}
@@ -437,6 +436,7 @@ var R_ST={pending_approval:['Pendiente','t-warn','⏸'],running:['Ejecutando','t
 var AG_ST2={scheduled:['Programada','t-info','◷'],due:['Por lanzar','t-warn','!'],running:['En curso','t-acc','▶'],waiting_approval:['Espera aprobación','t-warn','⏸'],done:['Hecha','t-ok','✓'],failed:['Fallida','t-bad','✕'],skipped:['Omitida','','⤼'],missed:['Perdida','t-bad','!']};
 var SE={none:'Sin efectos',internal:'Efecto interno',external:'Efecto externo'};
 var KIND={estrategico:'Estratégico',operativo:'Operativo',soporte:'Soporte'};
+AREAS.forEach(function(a){a.en=1});
 var area=function(k){return AREAS.filter(function(a){return a.k===k})[0]};
 var agent=function(k){return AGENTS.filter(function(a){return a.k===k})[0]};
 var areaAgents=function(k){return AGENTS.filter(function(a){return a.area===k&&a.en})};
@@ -523,7 +523,7 @@ var RUNS=[
  {id:'x1',tk:'r1b',a:'contabilidad',n:'Emitir factura',pr:{Cliente:'Nubia Ltda.',Importe:'$18.400.000',Moneda:'CLP'},s:'pending_approval',as:'action',pol:'U-02',rn:true,urg:false,hw:2.1,note:'',at:'Hoy 11:05'},
  {id:'x2',tk:'r4a',a:'contabilidad',n:'Enviar recordatorio de cobro',pr:{Cliente:'Tinta Norte',Factura:'F-2041',Adeudado:'$24.500.000',Mora:'38 días'},s:'pending_approval',as:'policy',pol:'U-03',rn:false,urg:false,hw:1.5,note:'',at:'Hoy 11:40'},
  {id:'x3',tk:'r3b',a:'operaciones',n:'Gestionar acceso',pr:{Persona:'Valentina Soto',Sistema:'Correo',Operación:'alta'},s:'pending_approval',as:'action',pol:'',rn:false,urg:false,hw:2.3,note:'',at:'Hoy 10:50'},
- {id:'x4',tk:'r2b',a:'contabilidad',n:'Enviar recordatorio de cobro',pr:{Cliente:'Alerce S.A.',Factura:'F-1988',Adeudado:'$3.200.000',Mora:'35 días'},s:'pending_approval',as:'untrusted_input',pol:'',rn:false,urg:true,hw:11.2,note:'',at:'Lun 23 11:00',src:'R-DIR-01 del lunes 23 · correo'},
+ {id:'x4',tk:'r2b',a:'contabilidad',n:'Enviar recordatorio de cobro',pr:{Cliente:'Alerce S.A.',Factura:'F-1988',Adeudado:'$3.200.000',Mora:'35 días'},s:'pending_approval',as:'untrusted_input',pol:'',rn:false,urg:true,hw:11.2,note:'',at:'Lun 23 11:00',day:'lun',src:'R-DIR-01 del lunes 23 · correo'},
  {id:'x9',tk:'r7a',a:'ventas',n:'Agendar reunión comercial',pr:{Lead:'L-327',Fecha:'2026-11-26 11:00',Asunto:'Propuesta Alerce'},s:'pending_approval',as:'action',pol:'',rn:false,urg:false,hw:3.5,note:'',at:'Hoy 09:40'},
  {id:'x5',tk:'r6a',a:'ventas',n:'Enviar propuesta',pr:{Cliente:'Tinta Norte',Importe:'$12.000.000'},s:'succeeded',note:'',at:'09:20'},
  {id:'x6',tk:'r6b',a:'ventas',n:'Agendar reunión comercial',pr:{Lead:'L-311'},s:'succeeded',note:'Aprobado sin cambios.',at:'09:45'},
@@ -533,23 +533,23 @@ var RUNS=[
 /* Agenda simulada: martes 24 nov 2026, 13:10 (15.º día hábil fue el vie 20). dueAt vs. hora: SPEC 5.4 */
 var NOW='13:10';
 var AGENDA=[
- {id:'R-DIR-01',t:'Leer y triar correo',h:'08:30',s:'waiting_approval',m:'auto',sec:'ceo',res:'Resumen del correo: 23 mensajes leídos; 6 delegados (Comercial 2, Soporte 2, Finanzas 1, Proyectos 1); 2 requieren tu atención (Alerce S.A. y Nubia Ltda.). Queda 1 hija esperando tu aprobación: agendar la reunión comercial con Alerce S.A.'},
- {id:'R-DIR-02',t:'Resolver pendientes del día',h:'09:00',s:'done',m:'auto',sec:'ceo',res:'Lista del día: 1) Aprobar la factura del hito 3 de Nubia Ltda. (prioridad alta). 2) Confirmar el ingreso de Valentina Soto (1 dic). 3) Revisar el cobro a Tinta Norte. Atrasadas: R-DIR-05 del lunes 23 (perdida).'},
- {id:'R-DIR-04a',t:'Preparar aprobaciones',h:'10:00',s:'done',m:'auto',sec:'ceo',nd:1,res:'Bandeja ordenada (5 pendientes). Recomendaciones: rechazar por ahora el recordatorio a Alerce S.A. (urgente, nace de un correo); aprobar el acceso de Valentina Soto; aprobar la reunión comercial; aprobar la factura de Nubia Ltda. con nota (U-02); aprobar el cobro a Tinta Norte (U-03). No aprueba nada por su cuenta.'},
- {id:'R-DIR-03a',t:'Revisar tareas de los agentes',h:'12:30',s:'running',m:'auto',sec:'ceo',res:'Semáforo por área (parcial, aún en curso): Finanzas ámbar (3 espera aprobación), Proyectos verde, Personas verde, Operaciones ámbar, Comercial verde.'},
+ {id:'R-DIR-01',t:'Leer y triar correo',h:'08:30',s:'waiting_approval',m:'auto',sec:'ceo',plan:'Plan: leer la bandeja (23 correos), clasificarlos y delegar lo accionable.\nSubtareas: Responder consulta de Nubia Ltda. (Soporte): completada. Agendar reunión comercial con Alerce S.A. (Comercial): espera tu aprobación.\nLa raíz queda en espera hasta que resuelvas esa aprobación.'},
+ {id:'R-DIR-02',t:'Resolver pendientes del día',h:'09:00',s:'done',m:'auto',sec:'ceo',res:'Lista del día (09:00): 1) Facturar el hito 3 de Nubia Ltda. (en curso). 2) Confirmar el ingreso de Valentina Soto (1 dic). 3) Revisar el cobro a Tinta Norte. Atrasadas: R-DIR-05 del lunes 23 (perdida) y R-PER-02 del viernes 20 (manual). Recibió y consumió los 3 pedidos internos de abajo.'},
+ {id:'R-DIR-04a',t:'Preparar aprobaciones',h:'10:00',s:'done',m:'auto',sec:'ceo',nd:1,res:'Bandeja a las 10:00 (2 pendientes): 1) recordatorio de cobro a Alerce S.A. (pendiente desde el lunes, urgente; nace de un correo): recomendación, rechazar hasta confirmar la deuda. 2) reunión comercial con Alerce S.A.: recomendación, aprobar. No aprueba nada por su cuenta.'},
+ {id:'R-DIR-03a',t:'Revisar tareas de los agentes',h:'12:30',s:'running',m:'auto',sec:'ceo',plan:'Plan: recorrer las 11 tareas abiertas y detectar bloqueadas, fallidas o fuera de plazo.\nSubtareas: aún no delegó ninguna (la revisión está en curso).'},
  {id:'R-DIR-04b',t:'Preparar aprobaciones',h:'15:00',s:'scheduled',m:'auto',sec:'ceo',nd:1},
  {id:'R-DIR-03b',t:'Revisar tareas de los agentes',h:'17:00',s:'scheduled',m:'auto',sec:'ceo'},
  {id:'R-DIR-04c',t:'Preparar aprobaciones',h:'17:30',s:'scheduled',m:'auto',sec:'ceo',nd:1},
  {id:'R-DIR-05',t:'Informe de cierre del día',h:'17:45',s:'scheduled',m:'auto',sec:'ceo',nd:1},
  {id:'R-MKT-02',t:'Plan de contenidos del mes',h:'10:00',s:'due',m:'manual',sec:'areas',who:'Lumen'},
- {id:'R-CLI-01',t:'Tickets abiertos y vencidos',h:'09:15',s:'failed',m:'auto',sec:'areas',who:'Faro',res:'Error: el sistema de tickets no respondió. La raíz quedó fallida; "Relanzar" crea una raíz nueva para la misma ocurrencia.'},
+ {id:'R-CLI-01',t:'Tickets abiertos y vencidos',h:'09:15',s:'failed',m:'auto',sec:'areas',who:'Faro',err:'Error: el sistema de tickets no respondió. La raíz quedó fallida; "Relanzar" crea una raíz nueva para la misma ocurrencia.'},
  {id:'R-DIR-05@23',t:'Informe de cierre del día',code:'R-DIR-05',h:'Lun 23 nov, 17:45',s:'missed',m:'auto',sec:'late',date:'2026-11-23',who:'Orión',nd:1},
  {id:'R-PER-02@20',t:'Insumos de remuneraciones',code:'R-PER-02',h:'Vie 20 nov, 10:00',s:'due',m:'manual',sec:'late',date:'2026-11-20',who:'Savia'}
 ];
-/* Pedidos internos (D-M20): líneas [ESCALAR] y [TRASPASO área] de los resultados recientes */
+/* Pedidos internos (D-M20): se entregan una sola vez y los consume la primera recurrente del CEO con recent_results (R-DIR-02 a las 09:00) */
 var PEDIDOS=[
  ['ESCALAR','Ábaco · Finanzas','Alerce S.A. lleva 35 días de mora (F-1988) y no responde a los recordatorios. Necesita decisión del Dueño.'],
- ['TRASPASO Comercial','Faro · Clientes y Soporte','Nubia Ltda. pide un cambio de alcance en el proyecto en curso. Se traspasa a Comercial.'],
+ ['TRASPASO comercial','Faro · Clientes y Soporte','Nubia Ltda. pide un cambio de alcance en el proyecto en curso. Se traspasa a Comercial.'],
  ['ESCALAR','Vector · Operaciones y TI','Hay 2 accesos de salidas sin revocar desde el viernes.']
 ];
 var POL=[['U-01','enviar_propuesta','importe > 30.000.000','Sí'],['U-02','emitir_factura','importe > 15.000.000 y moneda = CLP','Sí'],['U-03','enviar_recordatorio_cobro','monto_adeudado > 20.000.000','No'],['U-04','programar_pago','importe > 5.000.000','Sí'],['U-05','emitir_factura','moneda ≠ CLP','Sí']];
@@ -601,7 +601,8 @@ function metrics(){
   var tot=TASKS.length, act=TASKS.filter(function(t){return ['queued','planning','running','waiting_approval'].indexOf(t.s)>=0}).length;
   var done=TASKS.filter(function(t){return t.s==='completed'}).length;
   var pend=RUNS.filter(function(r){return r.s==='pending_approval'}).length;
-  return {tot:tot,act:act,done:done,pend:pend,runs:RUNS.length,resolved:RUNS.length-pend,pct:Math.round(done*100/tot)};
+  var today=RUNS.filter(function(r){return r.day!=='lun'}),tp=today.filter(function(r){return r.s==='pending_approval'}).length;
+  return {tot:tot,act:act,done:done,pend:pend,runs:today.length,resolved:today.length-tp,pct:Math.round(done*100/tot)};
 }
 var P0=RUNS.filter(function(r){return r.s==='pending_approval'}).length;
 function buildGauges(){
@@ -670,7 +671,7 @@ function renderAreas(){
   var loose=AGENTS.filter(function(a){return !a.en||!a.area});
   el.innerHTML=head(1,'Cada área con su agente líder, sus agentes de apoyo y su estado. Abre un área para ver a todos sus agentes.','<div class="row"><button type="button" class="btn btn-sm" id="newArea">Nueva área</button><button type="button" class="btn btn-primary btn-sm" id="newAgent">Nuevo agente</button></div>')+
    '<ul class="grid cols">'+AREAS.map(function(a,i){var ags=areaAgents(a.k),lead=ags.filter(function(g){return g.role!=='Apoyo'})[0],sup=ags.length-1,n=ags.reduce(function(s,g){return s+activeCount(g.k)},0);
-    return '<li class="card area-card"><h4><span class="n">'+String(i+1).padStart(2,'0')+'</span>'+esc(a.n)+'</h4><div class="row">'+dot(lead.c)+'<strong>'+esc(lead.n)+'</strong><span class="muted small">'+lead.role+' · '+lead.model+'</span></div><div class="row">'+badge(AG_ST,lead.st)+'<span class="small muted">'+n+(n===1?' tarea activa':' tareas activas')+(sup?' · '+sup+' de apoyo':'')+'</span></div>'+spark(i+1)+'<button type="button" class="btn btn-sm btn-ghost" data-area="'+a.k+'" aria-label="Abrir área '+esc(a.n)+', líder '+esc(lead.n)+'">Abrir área</button></li>';}).join('')+'</ul>'+
+    return '<li class="card area-card"><h4><span class="n">'+String(i+1).padStart(2,'0')+'</span>'+esc(a.n)+(a.en?'':' <span class="badge">Deshabilitada</span>')+'</h4><div class="row">'+dot(lead.c)+'<strong>'+esc(lead.n)+'</strong><span class="muted small">'+lead.role+' · '+lead.model+'</span></div><div class="row">'+badge(AG_ST,lead.st)+'<span class="small muted">'+n+(n===1?' tarea activa':' tareas activas')+(sup?' · '+sup+' de apoyo':'')+'</span></div>'+spark(i+1)+'<button type="button" class="btn btn-sm btn-ghost" data-area="'+a.k+'" aria-label="Abrir área '+esc(a.n)+', líder '+esc(lead.n)+'">Abrir área</button></li>';}).join('')+'</ul>'+
    '<h4 class="sec-title" id="looseT">Agentes deshabilitados o sin área ('+loose.length+')</h4>'+
    (loose.length?'<ul class="agent-grid" aria-labelledby="looseT">'+loose.map(agentRow).join('')+'</ul>':'<p class="empty">Todos los agentes están habilitados y tienen área.</p>');
   bindAgentRows(el);
@@ -690,11 +691,12 @@ function bindAgentRows(el){
 function renderArea(el,a){
   var ags=AGENTS.filter(function(g){return g.area===a.k});
   el.innerHTML='<button type="button" class="btn btn-sm btn-ghost back" id="backBtn"><span aria-hidden="true">←</span> Volver a las áreas</button>'+
-   head(1,esc(a.m),'<div class="row"><button type="button" class="btn btn-sm" id="editArea">Editar área</button><button type="button" class="btn btn-sm btn-danger" id="delArea">Borrar área</button><button type="button" class="btn btn-primary btn-sm" id="newAgent">Nuevo agente en esta área</button></div>').replace('<h3 tabindex="-1" id="h-1">'+MODS[1][2]+'</h3>','<h3 tabindex="-1" id="h-1">Área: '+esc(a.n)+'</h3>')+
+   head(1,esc(a.m)+(a.en?'':' <strong>Área deshabilitada:</strong> sus agentes salen del equipo que ve el CEO, el programador no lanza sus recurrentes y la agenda no las muestra (SPEC §4).'),'<div class="row"><button type="button" class="btn btn-sm" id="togArea">'+(a.en?'Deshabilitar área':'Habilitar área')+'</button><button type="button" class="btn btn-sm" id="editArea">Editar área</button><button type="button" class="btn btn-sm btn-danger" id="delArea">Borrar área</button><button type="button" class="btn btn-primary btn-sm" id="newAgent">Nuevo agente en esta área</button></div>').replace('<h3 tabindex="-1" id="h-1">'+MODS[1][2]+'</h3>','<h3 tabindex="-1" id="h-1">Área: '+esc(a.n)+'</h3>')+
    '<h4 class="sec-title" id="agT">Agentes del área ('+ags.length+')</h4><ul class="agent-grid" aria-labelledby="agT">'+ags.map(agentRow).join('')+'</ul>';
   bindAgentRows(el);
   $('#backBtn').onclick=function(){var k=av.area;av.area=null;renderAreas();$('[data-area="'+k+'"]').focus();announce('Volviste a la lista de áreas.');};
   $('#newAgent').onclick=function(){av.form={area:a.k};renderAreas();$('#h-1').focus();};
+  $('#togArea').onclick=function(){a.en=a.en?0:1;renderAreas();$('#togArea').focus();announce('Área '+a.n+(a.en?' habilitada.':' deshabilitada: sus agentes salen del equipo que ve el CEO y sus recurrentes salen de la agenda.'));};
   $('#editArea').onclick=function(){stub('editar el área '+a.n+' (PATCH /api/areas/:id)');};$('#delArea').onclick=function(){stub('confirmar el borrado del área '+a.n+' (DELETE /api/areas/:id)');};
 }
 function renderForm(el){
@@ -728,23 +730,25 @@ function renderAgent(el,g){
   $$('[data-del]',el).forEach(function(b){b.onclick=function(){stub('confirmar el borrado de la acción '+b.dataset.del);};});
 }
 
-/* 03 Mi día: agenda calculada (AgendaResponse, AgendaStatus) + resultados (TaskTree.result) + pedidos internos (D-M20) */
+/* 03 Mi día: agenda calculada (AgendaResponse) + detalle por tarea (TaskTree) + pedidos internos entregados (D-M20) */
 var openRes={};
+function aOff(a){if(!a.who)return false;var g=AGENTS.filter(function(x){return x.n===a.who})[0];return g&&g.area&&!area(g.area).en;}
+function detail(a){if(a.s==='done'&&a.res)return ['Ver resultado','Resultado',a.res];if(a.s==='failed'&&a.err)return ['Ver error','Error',a.err];if(a.plan&&(a.s==='waiting_approval'||a.s==='running'))return ['Ver plan y subtareas','Plan y subtareas',a.plan];return null;}
 function renderDay(){
   var el=$('#panel-2'),m=metrics(),ceoL=AGENDA.filter(function(a){return a.sec==='ceo'}),done=ceoL.filter(function(a){return a.s==='done'||a.s==='skipped'}).length;
   function lbl(a){return esc(a.t)+' '+(a.code||a.id);}
-  function btns(a){var o='';if(a.s==='due'||a.s==='missed')o+='<button type="button" class="btn btn-sm btn-ghost" data-run="'+a.id+'" aria-label="Lanzar ahora '+lbl(a)+'">Lanzar ahora</button><button type="button" class="btn btn-sm btn-ghost" data-skip="'+a.id+'" aria-label="Omitir '+lbl(a)+'">Omitir</button>';if(a.s==='failed')o+='<button type="button" class="btn btn-sm btn-ghost" data-run="'+a.id+'" aria-label="Relanzar '+lbl(a)+'">Relanzar</button>';if(a.res)o+='<button type="button" class="btn btn-sm btn-ghost" data-res="'+a.id+'" aria-expanded="'+!!openRes[a.id]+'" aria-controls="res-'+a.id.replace('@','-')+'" aria-label="Ver resultado '+lbl(a)+'">Ver resultado</button>';return o;}
-  function row(a,i,n){var rid='res-'+a.id.replace('@','-');return '<li class="card check">'+(n?'<span class="n t-acc" style="font:700 13px var(--mono)">'+String(i+1).padStart(2,'0')+'</span>':'')+'<span style="flex:1 1 220px"><strong>'+esc(a.t)+'</strong><span class="small muted"> · <span class="code">'+(a.code||a.id)+'</span> · '+a.h+' · '+(a.m==='auto'?'automática':'manual')+(a.nd?' · <span class="nd">sin delegación</span>':'')+(a.who?' · '+a.who:'')+'</span></span>'+badge(AG_ST2,a.s)+btns(a)+(a.res?'<div class="res" id="'+rid+'" role="region" aria-label="Resultado de '+lbl(a)+'"'+(openRes[a.id]?'':' hidden')+'><b>Resultado</b>\n'+esc(a.res)+'</div>':'')+'</li>';}
-  var late=AGENDA.filter(function(a){return a.sec==='late'}),oth=AGENDA.filter(function(a){return a.sec==='areas'||a.sec==='re'});
+  function btns(a){var o='',d=detail(a);if(a.s==='due'||a.s==='missed')o+='<button type="button" class="btn btn-sm btn-ghost" data-run="'+a.id+'" aria-label="Lanzar ahora '+lbl(a)+'">Lanzar ahora</button><button type="button" class="btn btn-sm btn-ghost" data-skip="'+a.id+'" aria-label="Omitir '+lbl(a)+'">Omitir</button>';if(a.s==='failed')o+='<button type="button" class="btn btn-sm btn-ghost" data-run="'+a.id+'" aria-label="Relanzar '+lbl(a)+'">Relanzar</button>';if(d)o+='<button type="button" class="btn btn-sm btn-ghost" data-res="'+a.id+'" aria-expanded="'+!!openRes[a.id]+'" aria-controls="res-'+a.id.replace('@','-')+'" aria-label="'+d[0]+' '+lbl(a)+'">'+d[0]+'</button>';return o;}
+  function row(a,i,n){var rid='res-'+a.id.replace('@','-'),d=detail(a);return '<li class="card check">'+(n?'<span class="n t-acc" style="font:700 13px var(--mono)">'+String(i+1).padStart(2,'0')+'</span>':'')+'<span style="flex:1 1 220px"><strong>'+esc(a.t)+'</strong><span class="small muted"> · <span class="code">'+(a.code||a.id)+'</span> · '+a.h+' · '+(a.m==='auto'?'automática':'manual')+(a.nd?' · <span class="nd">sin delegación</span>':'')+(a.who?' · '+a.who:'')+'</span></span>'+badge(AG_ST2,a.s)+btns(a)+(d?'<div class="res" id="'+rid+'" role="region" aria-label="'+d[1]+' de '+lbl(a)+'"'+(openRes[a.id]?'':' hidden')+'><b>'+d[1]+'</b>\n'+esc(d[2])+'</div>':'')+'</li>';}
+  var late=AGENDA.filter(function(a){return a.sec==='late'&&!aOff(a)}),oth=AGENDA.filter(function(a){return (a.sec==='areas'||a.sec==='re')&&!aOff(a)});
   el.innerHTML=head(2,'Agenda del CEO: las rutinas R-DIR del día con su estado y lo que te dejan para decidir. Las automáticas las lanza el programador; las manuales, tú. Hora simulada: '+NOW+'.')+
    '<div class="small" id="dayTxt">'+done+' de '+ceoL.length+' rutinas del CEO resueltas</div><div class="progress" aria-hidden="true"><i id="dayBar" style="width:'+(done*100/ceoL.length)+'%"></i></div>'+
    '<h4 class="group-title">Rutina de hoy (R-DIR)</h4><ul class="grid">'+ceoL.map(function(a,i){return row(a,i,1)}).join('')+'</ul>'+
-   '<h4 class="group-title">Escalado a ti y pedidos internos (D-M20)</h4><p class="small muted" style="background:var(--plate);padding:6px 10px">Líneas [ESCALAR] y [TRASPASO área] de los resultados recientes. El CEO las evalúa como pedidos internos; lo que delegue a partir de ellas hereda la marca de entrada no confiable.</p><ul class="grid">'+PEDIDOS.map(function(x){return '<li class="card pedido"><span class="badge t-warn">'+esc(x[0])+'</span><strong>'+esc(x[1])+'</strong><span style="flex:1 1 260px">'+esc(x[2])+'</span></li>';}).join('')+'</ul>'+
-   '<h4 class="group-title">Manuales, fallidas y relanzadas de hoy</h4><ul class="grid">'+oth.map(function(a){return row(a)}).join('')+'</ul>'+
+   '<h4 class="group-title">Pedidos internos entregados hoy (D-M20)</h4><p class="small muted" style="background:var(--plate);padding:6px 10px">Líneas [ESCALAR] y [TRASPASO área] de los resultados de las hijas (tabla <code>internal_requests</code>). Se entregan una sola vez: los consumió la R-DIR-02 de las 09:00 y no vuelven a llegar a las rutinas siguientes. Lo que delegue a partir de ellos hereda la marca de entrada no confiable. Lista ilustrativa: el SPEC aún no define cómo consultarlos.</p><ul class="grid">'+PEDIDOS.map(function(x){return '<li class="card pedido"><span class="badge t-warn">['+esc(x[0])+']</span><strong>'+esc(x[1])+'</strong><span style="flex:1 1 260px">'+esc(x[2])+'</span><span class="badge t-ok"><span aria-hidden="true">✓</span>Entregado a R-DIR-02</span></li>';}).join('')+'</ul>'+
+   '<h4 class="group-title">Manuales, fallidas y relanzadas de hoy</h4>'+(oth.length?'<ul class="grid">'+oth.map(function(a){return row(a)}).join('')+'</ul>':'<p class="empty">Nada pendiente en las áreas habilitadas.</p>')+
    '<h4 class="group-title">Atrasadas (días anteriores)</h4>'+(late.length?'<ul class="grid">'+late.map(function(a){return row(a)}).join('')+'</ul>':'<p class="empty">No hay tareas atrasadas.</p>')+
    '<h4 class="group-title">Ejecuciones</h4><ul class="grid"><li class="card check"><span style="flex:1 1 200px">Aprobar ejecuciones pendientes: <strong id="dayPend">'+m.pend+'</strong></span><button type="button" class="btn btn-sm btn-primary" id="goRuns">Ir a aprobaciones</button></li></ul>';
   $$('[data-res]',el).forEach(function(b){b.onclick=function(){var id=b.dataset.res;openRes[id]=!openRes[id];b.setAttribute('aria-expanded',!!openRes[id]);$('#res-'+id.replace('@','-')).hidden=!openRes[id];};});
-  $$('[data-run]',el).forEach(function(b){b.onclick=function(){var a=AGENDA.filter(function(x){return x.id===b.dataset.run})[0],was=a.s,late=a.sec==='late';a.s='running';a.sec='re';renderDay();$('#h-2').focus();announce((was==='failed'?'Relanzada: ':'Lanzada: ')+a.t+' ('+(a.code||a.id)+')'+(late?' con la fecha '+a.date:'')+'. Estado: en curso.'+(late?' Salió de Atrasadas.':''));};});
+  $$('[data-run]',el).forEach(function(b){b.onclick=function(){var a=AGENDA.filter(function(x){return x.id===b.dataset.run})[0],was=a.s,late=a.sec==='late';a.s='running';a.sec='re';a.err=null;a.plan='Plan: lanzada a mano; el CEO está planificando.\nSubtareas: aún sin delegar.';renderDay();$('#h-2').focus();announce((was==='failed'?'Relanzada: ':'Lanzada: ')+a.t+' ('+(a.code||a.id)+')'+(late?' con la fecha '+a.date:'')+'. Estado: en curso.'+(late?' Salió de Atrasadas.':''));};});
   $$('[data-skip]',el).forEach(function(b){b.onclick=function(){var a=AGENDA.filter(function(x){return x.id===b.dataset.skip})[0];a.s='skipped';if(a.sec==='late')a.sec='gone';renderDay();$('#h-2').focus();announce('Omitida: '+a.t+' ('+(a.code||a.id)+').');};});
   $('#goRuns').onclick=function(){selectTab(4,true);};
 }
@@ -767,7 +771,7 @@ function renderRuns(){
   var el=$('#panel-4'),pend=RUNS.filter(function(r){return r.s==='pending_approval'}).sort(function(a,b){return (b.urg-a.urg)||(b.hw-a.hw)}),hist=RUNS.filter(function(r){return r.s!=='pending_approval'}).sort(function(a,b){return b.at<a.at?-1:1});
   el.innerHTML=head(4,'Bandeja de aprobaciones (urgentes primero) e historial de ejecuciones de hoy.')+
    '<h4 class="group-title" id="inboxT" tabindex="-1" style="margin-top:0">Bandeja · '+pend.length+(pend.length===1?' pendiente':' pendientes')+'</h4>'+
-   (pend.length?'<ul class="grid">'+pend.map(function(r,i){var a=agent(r.a);return '<li class="card run" data-id="'+r.id+'"><h4><span class="n">'+String(i+1).padStart(2,'0')+'</span><span id="rt-'+r.id+'">'+esc(r.n)+'</span>'+(r.urg?'<span class="badge t-bad"><span aria-hidden="true">!</span>Urgente</span>':'')+'</h4><div class="row small muted">'+dot(a.c)+esc(a.n)+' · '+esc(area(a.area).n)+' · solicitada '+r.at+' · '+String(r.hw).replace('.',',')+' h hábiles esperando (jornada 09:00–18:00)</div><div class="params">'+Object.keys(r.pr).map(function(k){return '<span>'+esc(k)+': <b>'+esc(r.pr[k])+'</b></span>';}).join('')+'</div><p class="small muted">'+srcText(r)+'</p><label class="note-label" for="note-'+r.id+'" style="margin-top:8px">'+(r.rn?'Nota (obligatoria para aprobar, política '+r.pol+')':'Nota (opcional)')+'</label><textarea id="note-'+r.id+'" rows="2" placeholder="Se la entregamos al agente"'+(r.rn?' aria-required="true"':'')+' aria-describedby="err-'+r.id+'"></textarea><p class="small t-bad" id="err-'+r.id+'" hidden>Esta ejecución exige una nota para aprobarla (la API respondería 400). Puedes rechazar sin nota.</p><div class="actions"><button type="button" class="btn btn-primary btn-sm" data-ok="'+r.id+'" aria-label="Aprobar '+esc(r.n)+' de '+esc(r.pr.Cliente||r.pr.Persona||a.n)+'">Aprobar</button><button type="button" class="btn btn-danger btn-sm" data-no="'+r.id+'" aria-label="Rechazar '+esc(r.n)+' de '+esc(r.pr.Cliente||r.pr.Persona||a.n)+'">Rechazar</button></div></li>';}).join('')+'</ul>':'<p class="empty" id="emptyInbox" tabindex="-1">No hay ejecuciones pendientes. Buen trabajo.</p>')+
+   (pend.length?'<ul class="grid">'+pend.map(function(r,i){var a=agent(r.a);return '<li class="card run" data-id="'+r.id+'"><h4><span class="n">'+String(i+1).padStart(2,'0')+'</span><span id="rt-'+r.id+'">'+esc(r.n)+'</span>'+(r.urg?'<span class="badge t-bad"><span aria-hidden="true">!</span>Urgente</span>':'')+'</h4><div class="row small muted">'+dot(a.c)+esc(a.n)+' · '+esc(area(a.area).n)+' · solicitada '+r.at+' · '+String(r.hw).replace('.',',')+' h hábiles esperando (jornada 09:00–18:00)</div><div class="params">'+Object.keys(r.pr).map(function(k){return '<span>'+esc(k)+': <b>'+esc(r.pr[k])+'</b></span>';}).join('')+'</div><p class="small muted">'+srcText(r)+'</p><label class="note-label" id="nl-'+r.id+'" for="note-'+r.id+'" style="margin-top:8px">'+(r.rn?'Nota (obligatoria para aprobar, política '+r.pol+')':'Nota (opcional)')+'</label><textarea id="note-'+r.id+'" aria-labelledby="nl-'+r.id+' rt-'+r.id+'" rows="2" placeholder="Se la entregamos al agente"'+(r.rn?' aria-required="true"':'')+' aria-describedby="err-'+r.id+'"></textarea><p class="small t-bad" id="err-'+r.id+'" hidden>Esta ejecución exige una nota para aprobarla (la API respondería 400). Puedes rechazar sin nota.</p><div class="actions"><button type="button" class="btn btn-primary btn-sm" data-ok="'+r.id+'" aria-label="Aprobar '+esc(r.n)+' de '+esc(r.pr.Cliente||r.pr.Persona||a.n)+'">Aprobar</button><button type="button" class="btn btn-danger btn-sm" data-no="'+r.id+'" aria-label="Rechazar '+esc(r.n)+' de '+esc(r.pr.Cliente||r.pr.Persona||a.n)+'">Rechazar</button></div></li>';}).join('')+'</ul>':'<p class="empty" id="emptyInbox" tabindex="-1">No hay ejecuciones pendientes. Buen trabajo.</p>')+
    '<h4 class="group-title">Historial de hoy</h4><ul class="hist">'+hist.map(function(r){return '<li><span><strong>'+esc(r.n)+'</strong> · '+esc(agent(r.a).n)+' · '+r.at+'</span>'+badge(R_ST,r.s)+(r.err?'<span class="sub">Error: '+esc(r.err)+'</span>':'')+(r.note?'<span class="sub note-row">Nota: '+esc(r.note)+'</span>':'')+'</li>';}).join('')+'</ul>'+
    '<h4 class="group-title">Políticas de aprobación (U-01 a U-05)</h4><div class="cfg"><button type="button" class="btn btn-sm btn-primary" id="newPol">Nueva política</button></div><ul class="grid">'+POL.map(function(x){return '<li class="card check"><span style="flex:1 1 260px"><span class="code">'+x[0]+'</span> · <code>'+x[1]+'</code> · '+esc(x[2])+' · nota obligatoria: <strong>'+x[3]+'</strong></span><button type="button" class="btn btn-sm btn-ghost" data-pole="'+x[0]+'" aria-label="Editar política '+x[0]+'">Editar</button><button type="button" class="btn btn-sm btn-ghost" data-pold="'+x[0]+'" aria-label="Borrar política '+x[0]+'">Borrar</button></li>';}).join('')+'</ul>';
   $('#newPol').onclick=function(){stub('crear una política (POST /api/approval-policies)');};
@@ -800,20 +804,39 @@ $('#reqForm').addEventListener('submit',function(e){
 rq.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#reqForm').requestSubmit();}});
 
 /* ===== Abrir / cerrar con transición ===== */
+function frame(){
+  /* Mide la ventana real (HUD oculto pero maquetado) y calcula el dolly para dejar al CEO en su centro */
+  var W=innerWidth,H=innerHeight,mob=W<=860;
+  hud.hidden=false;hud.style.visibility='hidden';hud.scrollTop=0;
+  var w=$('.window').getBoundingClientRect();
+  hud.hidden=true;hud.style.visibility='';
+  var boxH=Math.max(W*7/12,H),cx=W/2,cy=H/2-.13*boxH,ox=W*.5,oy=H*.42,ceoH=.17*boxH;
+  var s=Math.min(mob?.62:.78,Math.max(.3,(w.height-26)/ceoH));
+  var tx=w.left+w.width/2,ty=w.top+w.height/2+8;
+  var st=$('#sceneWrap').style;
+  st.setProperty('--s',s.toFixed(3));st.setProperty('--dx',(tx-ox-s*(cx-ox)).toFixed(1)+'px');st.setProperty('--dy',(ty-oy-s*(cy-oy)).toFixed(1)+'px');
+}
 function open(opener,agentKey){
   if(state!=='closed')return;
   if(agentKey){active=1;av={area:null,agent:agentKey,form:null};}
+  else if(opener===ceo){active=0;av={area:null,agent:null,form:null};}
   state='dolly';trigger=opener||ceo;app.inert=true;
   var rm=reduced();
-  if(rm)show(rm);else{document.body.classList.add('dolly');T(function(){show(rm);},780);}
+  frame();document.body.classList.add('dolly');
+  if(rm)show(rm);else T(function(){show(rm);},780);
 }
+function cancelOpen(){
+  timers.forEach(clearTimeout);timers=[];document.body.classList.remove('dolly');app.inert=false;state='closed';
+  (trigger||ceo).focus({preventScroll:true});announce('Apertura cancelada. Volviste a la oficina.',true);
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&state==='dolly'){e.preventDefault();cancelOpen();}});
 function setBars(){var t=$('.topbar'),r=$('.rail');hud.style.setProperty('--bt',(t.offsetHeight+8+8)+'px');hud.style.setProperty('--br',(r.offsetHeight+8+8)+'px');}
 window.addEventListener('resize',setBars);
 function show(rm){
   state='opening';document.body.classList.add('hud-open');hud.hidden=false;hud.dataset.state='opening';
   selectTab(active,false,true);setBars();
   if(av.agent&&active===1){$('#h-1').focus({preventScroll:true});}else $('#tab-'+active).focus({preventScroll:true});
-  announce('Centro de mando abierto. Módulo '+(active+1)+' de 5: '+MODS[active][2]+'. Usa las flechas para cambiar de módulo y Escape para cerrar.');
+  announce(av.agent&&active===1?'Centro de mando abierto en la ficha de '+agent(av.agent).n+'. Escape cierra y vuelve a la oficina.':'Centro de mando abierto. Módulo '+(active+1)+' de 5: '+MODS[active][2]+'. Usa las flechas para cambiar de módulo y Escape para cerrar.');
   T(function(){state='open';hud.dataset.state='open';},rm?130:1000);
 }
 function close(){
